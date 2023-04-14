@@ -1,0 +1,11 @@
+
+dependencies {
+    testImplementation libs.truth
+}
+
+project.ext.pomName = 'Binary Resources parser'
+project.ext.pomDesc = 'Library for parsing the resources.arsc file'
+
+group = 'com.android.tools.apkparser'
+archivesBaseName = 'binary-resources'
+version = rootProject.version

@@ -1,0 +1,6 @@
+rootProject.name = 'apkparser'
+
+include 'cli'
+include 'analyzer'
+include 'binary-resources'
+

@@ -1,0 +1,52 @@
+buildscript {
+    ext {
+        libs = [
+            baksmali       : 'org.smali:baksmali:2.2.4',
+            smali          : 'org.smali:smali:2.2.4',
+            jopt           : 'net.sf.jopt-simple:jopt-simple:4.9',
+            common         : 'com.android.tools:common:27.1.1',
+            sdk_common     : 'com.android.tools:sdk-common:27.1.1',
+            sdklib         : 'com.android.tools:sdklib:27.1.1',
+            truth          : 'com.google.truth:truth:0.44',
+            mockito_core   : 'org.mockito:mockito-core:3.0.0',
+        ]
+    }
+}
+
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.github.hierynomus.license" version "0.16.1"
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+group = 'com.android.apk'
+version = '1.0'
+
+allprojects {
+
+    apply plugin: 'java'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+    }
+
+    dependencies {
+        implementation "com.google.guava:guava:31.1-jre"
+        implementation "com.android.tools:annotations:27.1.1"
+
+        testImplementation "junit:junit:4.13.2"
+        testImplementation "com.android.tools:testutils:27.1.1"
+        testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.2"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.2"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

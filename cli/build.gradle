@@ -1,0 +1,104 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+// apply plugin: 'java'
+// apply plugin: 'jacoco-tools-base'
+// apply plugin: 'sdk-java-lib'
+
+plugins {
+    id 'application'
+}
+
+application {
+    mainClass = 'com.android.tools.apk.analyzer.ApkAnalyzerCli'
+}
+
+dependencies {
+    implementation libs.jopt
+    implementation libs.sdklib
+    implementation libs.sdk_common
+    implementation libs.smali
+
+    implementation project(':analyzer')
+    implementation project(":binary-resources")
+
+    testImplementation libs.mockito_core
+}
+/*
+sdk {
+    common(mac, linux) {
+        item(new File(analyzerStartScripts.outputDir, "apkanalyzer")) {
+            into "bin"
+            notice null
+            builtBy 'analyzerStartScripts'
+        }
+    }
+    windows {
+        item(new File(analyzerStartScripts.outputDir, "apkanalyzer")) {
+            into "bin"
+            notice null
+            builtBy 'analyzerStartScripts'
+        }
+    }
+}
+*/
+
+// configure the manifest of the sdkJar task.
+// sdkJar.manifest.attributes("Main-Class": "com.android.tools.apk.analyzer.ApkAnalyzerCli")
+
+tasks.register('analyzerStartScripts', CreateStartScripts) {
+    classpath = project.getTasks().getAt(JavaPlugin.JAR_TASK_NAME).getOutputs().getFiles().plus(
+            project.getConfigurations().getByName("runtimeOnly"))
+    outputDir new File(project.getBuildDir(), "scripts")
+
+    description "Creates OS specific scripts to start the apkanalyzer CLI"
+    mainClass = 'com.android.tools.apk.analyzer.ApkAnalyzerCli'
+    applicationName = 'apkanalyzer'
+    defaultJvmOpts = ["-Dcom.android.sdklib.toolsdir=MY_APP_HOME"]
+
+    doLast {
+        unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
+        windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%~dp0\\..')
+    }
+}
+
+//sdk {
+//    common(mac, linux) {
+//        item(new File(analyzerStartScripts.outputDir, "apkanalyzer")) {
+//            into "bin"
+//            notice null
+//            builtBy 'analyzerStartScripts'
+//        }
+//    }
+//    windows {
+//        item(new File(analyzerStartScripts.outputDir, "apkanalyzer")) {
+//            into "bin"
+//            notice null
+//            builtBy 'analyzerStartScripts'
+//        }
+//    }
+//}
+
+project.ext.pomName = 'Android APK Analyzer tool'
+project.ext.pomDesc = 'Command line APK inspection tool'
+group = 'com.android.tools.apkparser'
+archivesBaseName = 'apkanalyzer-cli'
+version = rootProject.version
+
+//println  "Root project:   ${project.rootProject}";
+
+// Artifact to use as standalone command line tool.
+tasks.register('executableJar', ShadowJar) {
+    archiveBaseName = 'apkanalyzer'
+    archiveClassifier = 'all'
+
+    configurations = [project.configurations.compileClasspath]
+
+    from sourceSets.main.output
+
+    manifest {
+        attributes 'Main-Class': 'com.android.tools.apk.analyzer.ApkAnalyzerCli'
+    }
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+}
