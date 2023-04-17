@@ -32,7 +32,7 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
-import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
 import org.junit.Test;
 
 public class PackageTreeCreatorTest {

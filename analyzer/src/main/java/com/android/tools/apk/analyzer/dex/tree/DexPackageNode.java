@@ -18,8 +18,8 @@ package com.android.tools.apk.analyzer.dex.tree;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import javax.swing.*;
-import org.jf.dexlib2.iface.reference.TypeReference;
-import org.jf.dexlib2.immutable.reference.ImmutableTypeReference;
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableTypeReference;
 
 public class DexPackageNode extends DexElementNode {
     @Nullable private final String packageName;

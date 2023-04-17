@@ -22,8 +22,8 @@ import com.android.tools.proguard.ProguardSeedsMap;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.swing.tree.DefaultMutableTreeNode;
-import org.jf.dexlib2.iface.reference.Reference;
-import org.jf.dexlib2.immutable.reference.ImmutableReference;
+import com.android.tools.smali.dexlib2.iface.reference.Reference;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableReference;
 
 public abstract class DexElementNode extends DefaultMutableTreeNode {
 

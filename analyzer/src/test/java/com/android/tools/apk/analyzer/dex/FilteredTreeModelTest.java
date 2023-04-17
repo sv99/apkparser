@@ -31,7 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import javax.swing.tree.TreeModel;
-import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
 import org.junit.Test;
 
 public class FilteredTreeModelTest {
@@ -92,7 +92,7 @@ public class FilteredTreeModelTest {
         options.setShowFields(true);
         options.setShowMethods(false);
         options.setShowReferencedNodes(true);
-        FilteredTreeModel filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
+        FilteredTreeModel<DexElementNode> filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
 
         StringBuffer sb = new StringBuffer(100);
         dumpTree(sb, filteredTreeModel, packageTreeNode, 0);
