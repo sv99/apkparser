@@ -48,6 +48,7 @@ import com.android.tools.apk.analyzer.internal.SigUtils;
 import com.android.tools.proguard.ProguardMap;
 import com.android.tools.proguard.ProguardSeedsMap;
 import com.android.tools.proguard.ProguardUsagesMap;
+import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -74,7 +75,6 @@ import java.util.stream.Stream;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.xml.sax.SAXException;
 
 /**
