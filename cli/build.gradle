@@ -19,7 +19,7 @@ dependencies {
     implementation libs.smali
 
     implementation project(':analyzer')
-    implementation project(":binary-resources")
+//    implementation project(":binary-resources")
 
     testImplementation libs.mockito_core
 }

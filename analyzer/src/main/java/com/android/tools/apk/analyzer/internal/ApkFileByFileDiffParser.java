@@ -35,10 +35,12 @@ import com.android.tools.apk.analyzer.ArchiveContext;
 import com.android.tools.apk.analyzer.ArchiveEntry;
 import com.android.tools.apk.analyzer.ArchiveNode;
 import com.android.tools.apk.analyzer.ArchiveTreeStructure;
-import com.google.archivepatcher.explainer.EntryExplanation;
-import com.google.archivepatcher.explainer.PatchExplainer;
-import com.google.archivepatcher.generator.bsdiff.BsDiffDeltaGenerator;
-import com.google.archivepatcher.shared.DeflateCompressor;
+
+import com.android.tools.apk.analyzer.diff.explainer.EntryExplanation;
+import com.android.tools.apk.analyzer.diff.explainer.PatchExplainer;
+import com.android.tools.apk.analyzer.diff.generator.bsdiff.BsDiffDeltaGenerator;
+import com.android.tools.apk.analyzer.diff.shared.DeflateCompressor;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.file.Files;
