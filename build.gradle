@@ -1,8 +1,8 @@
 buildscript {
     ext {
         libs = [
-            baksmali       : 'org.smali:baksmali:2.2.4',
-            smali          : 'org.smali:smali:2.2.4',
+            baksmali       : 'org.smali:baksmali:2.5.2',
+            smali          : 'org.smali:smali:2.5.2',
             jopt           : 'net.sf.jopt-simple:jopt-simple:4.9',
             common         : 'com.android.tools:common:27.1.1',
             sdk_common     : 'com.android.tools:sdk-common:27.1.1',

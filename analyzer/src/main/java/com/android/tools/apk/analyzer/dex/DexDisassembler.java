@@ -28,6 +28,7 @@ import java.util.stream.StreamSupport;
 import org.jf.baksmali.Adaptors.ClassDefinition;
 import org.jf.baksmali.Adaptors.MethodDefinition;
 import org.jf.baksmali.BaksmaliOptions;
+import org.jf.baksmali.formatter.BaksmaliWriter;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.iface.ClassDef;
 import org.jf.dexlib2.iface.DexFile;
@@ -36,6 +37,7 @@ import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.rewriter.DexRewriter;
+import org.jf.dexlib2.rewriter.DexFileRewriter;
 import org.jf.dexlib2.rewriter.Rewriter;
 import org.jf.dexlib2.rewriter.RewriterModule;
 import org.jf.dexlib2.rewriter.Rewriters;
@@ -106,14 +108,14 @@ public class DexDisassembler {
         ClassDefinition classDefinition = new ClassDefinition(options, classDef);
 
         StringWriter writer = new StringWriter(1024);
-        try (IndentingWriter iw = new IndentingWriter(writer)) {
+        try (BaksmaliWriter bw = new BaksmaliWriter(writer)) {
             MethodImplementation methodImpl = method.getImplementation();
             if (methodImpl == null) {
-                MethodDefinition.writeEmptyMethodTo(iw, method, options);
+                MethodDefinition.writeEmptyMethodTo(bw, method, classDefinition);
             } else {
                 MethodDefinition methodDefinition =
                         new MethodDefinition(classDefinition, method, methodImpl);
-                methodDefinition.writeTo(iw);
+                methodDefinition.writeTo(bw);
             }
         }
 
@@ -132,15 +134,15 @@ public class DexDisassembler {
         ClassDefinition classDefinition = new ClassDefinition(options, classDef.get());
 
         StringWriter writer = new StringWriter(1024);
-        try (IndentingWriter iw = new IndentingWriter(writer)) {
-            classDefinition.writeTo(iw);
+        try (BaksmaliWriter bw = new BaksmaliWriter(writer)) {
+            classDefinition.writeTo(bw);
         }
         return writer.toString().replace("\r", "");
     }
 
     private static DexFile rewriteDexFile(@NonNull DexFile dexFile, @NonNull ProguardMap map) {
-        DexRewriter rewriter = getRewriter(map);
-        return rewriter.rewriteDexFile(dexFile);
+        DexFileRewriter rewriter = new DexFileRewriter(getRewriter(map));
+        return rewriter.rewrite(dexFile);
     }
 
     @NonNull
