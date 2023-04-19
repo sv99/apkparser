@@ -58,7 +58,10 @@ public class ArchivePathEntry extends ArchiveEntry {
     @Override
     @NonNull
     public String getSummaryDisplayString() {
-        return getPathPrefix() + getPath().toString();
+        String fullPath = getPathPrefix() + getPath().toString();
+        if (fullPath.length() > 1)
+            fullPath = trimEnd(fullPath, "/");
+        return fullPath;
     }
 
     @NonNull

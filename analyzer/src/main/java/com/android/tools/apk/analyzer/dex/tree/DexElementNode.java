@@ -21,9 +21,14 @@ import com.android.tools.proguard.ProguardMap;
 import com.android.tools.proguard.ProguardSeedsMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+
 import com.android.tools.smali.dexlib2.iface.reference.Reference;
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableReference;
+import one.util.streamex.StreamEx;
 
 public abstract class DexElementNode extends DefaultMutableTreeNode {
 
@@ -66,7 +71,11 @@ public abstract class DexElementNode extends DefaultMutableTreeNode {
             node.sort(comparator);
         }
         if (children != null) {
-            Collections.sort(children, comparator);
+            // Collections.sort(children, comparator);
+            List<DexElementNode> elementNodes = StreamEx.of(children)
+                    .select(DexElementNode.class).toMutableList();
+            elementNodes.sort(comparator);
+            children = new Vector<>(elementNodes);
         }
     }
 

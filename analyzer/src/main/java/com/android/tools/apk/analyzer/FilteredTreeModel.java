@@ -55,6 +55,7 @@ public class FilteredTreeModel<T> extends DefaultTreeModel {
     public int getChildCount(Object parent) {
         int count = 0;
         for (int i = 0, n = super.getChildCount(parent); i < n; i++) {
+            @SuppressWarnings("unchecked")
             T result = (T) super.getChild(parent, i);
             if (predicate.test(result)) {
                 count++;
@@ -68,6 +69,7 @@ public class FilteredTreeModel<T> extends DefaultTreeModel {
     public int getIndexOfChild(Object parent, Object child) {
         int index = 0;
         for (int i = 0, n = super.getChildCount(parent); i < n; i++) {
+            @SuppressWarnings("unchecked")
             T result = (T) super.getChild(parent, i);
             if (predicate.test(result)) {
                 if (result.equals(child)) {

@@ -28,6 +28,7 @@ import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
+import one.util.streamex.StreamEx;
 
 public class ArchiveTreeNode extends DefaultMutableTreeNode implements ArchiveNode {
     public ArchiveTreeNode(@NonNull ArchiveEntry data) {
@@ -37,17 +38,9 @@ public class ArchiveTreeNode extends DefaultMutableTreeNode implements ArchiveNo
     @NonNull
     @Override
     public List<ArchiveNode> getChildren() {
-//        if (children == null) {
-//            return ImmutableList.of();
-//        } else {
-//            Vector<ArchiveNode> res = new Vector<ArchiveNode>();;
-//            for (TreeNode t: children ) {
-//                res.add((ArchiveNode)t);
-//            }
-//            return res;
-//        }
-        //noinspection unchecked
-        return children == null ? ImmutableList.of() : ImmutableList.copyOf(children);
+        return children == null ? ImmutableList.of() : StreamEx.of(children)
+                .select(ArchiveNode.class)
+                .toImmutableList();
     }
 
     @Override
