@@ -14,11 +14,12 @@
 
 package com.android.tools.apk.analyzer.diff.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,8 +28,6 @@ import java.io.OutputStream;
 /**
  * Tests for {@link CountingOutputStream}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class CountingOutputStreamTest {
   private ByteArrayOutputStream outBuffer;
   private CountingOutputStream stream;
@@ -53,7 +52,7 @@ public class CountingOutputStreamTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     outBuffer = new ByteArrayOutputStream();
     stream = new CountingOutputStream(outBuffer);
@@ -61,19 +60,19 @@ public class CountingOutputStreamTest {
 
   @Test
   public void testGetNumBytesWritten_Zero() {
-    Assert.assertEquals(0, stream.getNumBytesWritten());
+    assertEquals(0, stream.getNumBytesWritten());
   }
 
   @Test
   public void testGetNumBytesWritten_FewBytes() throws IOException {
     stream.write(1);
-    Assert.assertEquals(1, stream.getNumBytesWritten());
+    assertEquals(1, stream.getNumBytesWritten());
     stream.write(new byte[] {2, 3, 4});
-    Assert.assertEquals(4, stream.getNumBytesWritten());
+    assertEquals(4, stream.getNumBytesWritten());
     stream.write(new byte[] {4, 5, 6, 7, 8}, 1, 3); // Write only {5, 6, 7}
-    Assert.assertEquals(7, stream.getNumBytesWritten());
+    assertEquals(7, stream.getNumBytesWritten());
     byte[] expected = new byte[] {1, 2, 3, 4, 5, 6, 7};
-    Assert.assertArrayEquals(expected, outBuffer.toByteArray());
+    assertArrayEquals(expected, outBuffer.toByteArray());
   }
 
   @Test
@@ -86,13 +85,13 @@ public class CountingOutputStreamTest {
       stream.write(buffer);
     }
     long expected = 2048L * 1024L * 1024L; // == 2GB, Integer.MAX_VALUE + 1
-    Assert.assertTrue(expected > Integer.MAX_VALUE);
-    Assert.assertEquals(expected, stream.getNumBytesWritten());
+    assertTrue(expected > Integer.MAX_VALUE);
+    assertEquals(expected, stream.getNumBytesWritten());
     // Push it well past 4GB
     for (int x = 0; x < 78053; x++) {
       stream.write(buffer);
       expected += buffer.length;
-      Assert.assertEquals(expected, stream.getNumBytesWritten());
+      assertEquals(expected, stream.getNumBytesWritten());
     }
   }
 }

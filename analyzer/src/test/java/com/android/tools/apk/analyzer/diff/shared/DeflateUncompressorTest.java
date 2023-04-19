@@ -14,29 +14,26 @@
 
 package com.android.tools.apk.analyzer.diff.shared;
 
-import static org.junit.Assert.assertTrue;
-
-import com.android.tools.apk.analyzer.diff.shared.DeflateUncompressor;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DeflateUncompressor}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class DeflateUncompressorTest {
 
   /**
@@ -50,7 +47,7 @@ public class DeflateUncompressorTest {
   private DeflateUncompressor uncompressor;
   private ByteArrayOutputStream uncompressedContentOut;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     ByteArrayOutputStream compressedContentBuffer = new ByteArrayOutputStream();
     Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
@@ -68,7 +65,7 @@ public class DeflateUncompressorTest {
   @Test
   public void testUncompress() throws IOException {
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    assertTrue(Arrays.equals(CONTENT, uncompressedContentOut.toByteArray()));
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
   }
 
   @Test
@@ -76,7 +73,7 @@ public class DeflateUncompressorTest {
     // Sanity check to ensure that defaults are as we want them to be. Arguably crufty but nobody
     // should change these without some thought, particularly the wrapping choice should not be
     // changed in the compressor without also changing it in the *un*compressor.
-    Assert.assertTrue(uncompressor.isNowrap());
+    assertTrue(uncompressor.isNowrap());
   }
 
   @Test
@@ -95,25 +92,25 @@ public class DeflateUncompressorTest {
     // Now expect wrapped content in the uncompressor, and uncompressing should "just work".
     uncompressor.setNowrap(false);
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    assertTrue(Arrays.equals(CONTENT, uncompressedContentOut.toByteArray()));
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
   }
 
   @Test
   public void testSetInputBufferSize() throws IOException {
-    Assert.assertNotEquals(17, uncompressor.getInputBufferSize()); // Ensure test is valid
+    assertNotEquals(17, uncompressor.getInputBufferSize()); // Ensure test is valid
     uncompressor.setInputBufferSize(17); // Arbitrary non-default value
-    Assert.assertEquals(17, uncompressor.getInputBufferSize());
+    assertEquals(17, uncompressor.getInputBufferSize());
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    Assert.assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
   }
 
   @Test
   public void testSetOutputBufferSize() throws IOException {
-    Assert.assertNotEquals(17, uncompressor.getOutputBufferSize()); // Ensure test is valid
+    assertNotEquals(17, uncompressor.getOutputBufferSize()); // Ensure test is valid
     uncompressor.setOutputBufferSize(17); // Arbitrary non-default value
-    Assert.assertEquals(17, uncompressor.getOutputBufferSize());
+    assertEquals(17, uncompressor.getOutputBufferSize());
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    Assert.assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
   }
 
   @Test
@@ -121,7 +118,7 @@ public class DeflateUncompressorTest {
     uncompressor.setCaching(false);
     Inflater inflater1 = uncompressor.createOrResetInflater();
     Inflater inflater2 = uncompressor.createOrResetInflater();
-    Assert.assertNotSame(inflater1, inflater2);
+    assertNotSame(inflater1, inflater2);
   }
 
   @Test
@@ -129,7 +126,7 @@ public class DeflateUncompressorTest {
     uncompressor.setCaching(true);
     Inflater inflater1 = uncompressor.createOrResetInflater();
     Inflater inflater2 = uncompressor.createOrResetInflater();
-    Assert.assertSame(inflater1, inflater2);
+    assertSame(inflater1, inflater2);
   }
 
   @Test
@@ -138,7 +135,7 @@ public class DeflateUncompressorTest {
     Inflater inflater1 = uncompressor.createOrResetInflater();
     uncompressor.release();
     Inflater inflater2 = uncompressor.createOrResetInflater();
-    Assert.assertNotSame(inflater1, inflater2);
+    assertNotSame(inflater1, inflater2);
   }
 
   @Test
@@ -147,13 +144,13 @@ public class DeflateUncompressorTest {
     // properly reset between runs.
     uncompressor.setCaching(true);
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    Assert.assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
 
     // Caching is on, try to reuse it without any changes.
     compressedContentIn = new ByteArrayInputStream(compressedContent);
     uncompressedContentOut = new ByteArrayOutputStream();
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    Assert.assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
 
     // Caching is still on, reverse the wrapping style and try again. Changing the wrapping style
     // invalidates the cached uncompressor because the wrapping style cannot be changed, this is a
@@ -172,6 +169,6 @@ public class DeflateUncompressorTest {
     uncompressor.setNowrap(false);
     uncompressedContentOut = new ByteArrayOutputStream();
     uncompressor.uncompress(compressedContentIn, uncompressedContentOut);
-    assertTrue(Arrays.equals(CONTENT, uncompressedContentOut.toByteArray()));
+    assertArrayEquals(CONTENT, uncompressedContentOut.toByteArray());
   }
 }

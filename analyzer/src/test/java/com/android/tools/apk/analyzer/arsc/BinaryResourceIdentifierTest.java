@@ -16,52 +16,22 @@
 
 package com.android.tools.apk.analyzer.arsc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Arrays;
-
-@RunWith(Parameterized.class)
 public class BinaryResourceIdentifierTest {
 
-  @Parameters
-  public static Iterable<Object[]> data() {
-    return Arrays.asList(new Object[][] {
-      {0x01234567, 0x01, 0x23, 0x4567},
-      {0xFEDCBA98, 0xFE, 0xDC, 0xBA98}
-    });
-  }
-
-  private final int packageId;
-  private final int typeId;
-  private final int entryId;
-  private BinaryResourceIdentifier resourceIdentifier;
-
-  public BinaryResourceIdentifierTest(int resourceId, int packageId, int typeId, int entryId) {
-    resourceIdentifier = BinaryResourceIdentifier.create(resourceId);
-    this.packageId = packageId;
-    this.typeId = typeId;
-    this.entryId = entryId;
-  }
-
-  @Test
-  public void resourceIdentifier_comparePackage()
-  {
+  @ParameterizedTest
+  @CsvSource({
+    "0x01234567, 0x01, 0x23, 0x4567",
+    "0xFEDCBA98, 0xFE, 0xDC, 0xBA98"
+  })
+  void testIdentifier(long resourceId, int packageId, int typeId, int entryId) {
+    final BinaryResourceIdentifier resourceIdentifier = BinaryResourceIdentifier.create((int)resourceId);
     assertEquals(packageId, resourceIdentifier.packageId());
-  }
-
-  @Test
-  public void resourceIdentifier_compareType() {
     assertEquals(typeId, resourceIdentifier.typeId());
-  }
-
-  @Test
-  public void resourceIdentifier_compareEntry() {
     assertEquals(entryId, resourceIdentifier.entryId());
   }
 }
-

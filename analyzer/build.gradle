@@ -20,8 +20,7 @@ dependencies {
   implementation libs.common
   implementation libs.sdklib
   implementation libs.sdk_common
-//  implementation project(":binary-resources")
-//  implementation "com.google:archivepatcher:1.0"
+  implementation libs.streamex
 }
 
 project.ext.pomName = 'Apk Analyzer library'

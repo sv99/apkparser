@@ -14,12 +14,12 @@
 
 package com.android.tools.apk.analyzer.diff.generator.bsdiff;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
 import java.util.Random;
-import org.junit.Assert;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Base class for suffix sorter tests with common tests for a suffix sorter algorithm.
@@ -46,7 +46,7 @@ public abstract class SuffixSorterTestBase {
     RandomAccessObject groupArray = getSuffixSorter().suffixSort(input);
 
     assertSorted(groupArray, input);
-    Assert.assertArrayEquals(expectedSuffixArray, randomAccessObjectToIntArray(groupArray));
+    assertArrayEquals(expectedSuffixArray, randomAccessObjectToIntArray(groupArray));
   }
 
   @Test
@@ -55,7 +55,7 @@ public abstract class SuffixSorterTestBase {
 
     assertSorted(groupArrayRO, BsDiffTestData.LONG_DATA_99_RO);
 
-    Assert.assertArrayEquals(
+    assertArrayEquals(
         BsDiffTestData.QUICK_SUFFIX_SORT_TEST_GA_CONTROL,
         randomAccessObjectToIntArray(groupArrayRO));
   }
@@ -67,7 +67,7 @@ public abstract class SuffixSorterTestBase {
 
     assertSorted(groupArray2RO, BsDiffTestData.LONGER_DATA_349_RO);
 
-    Assert.assertArrayEquals(
+    assertArrayEquals(
         BsDiffTestData.QUICK_SUFFIX_SORT_TEST_IA_CONTROL,
         randomAccessObjectToIntArray(groupArray2RO));
   }

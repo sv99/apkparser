@@ -14,7 +14,10 @@
 
 package com.android.tools.apk.analyzer.diff.generator.bsdiff;
 
-import com.android.tools.apk.analyzer.diff.generator.bsdiff.Matcher.NextMatch;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,12 +25,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class BsDiffTest {
 
   @Test
@@ -43,13 +42,13 @@ public class BsDiffTest {
     RandomAccessObject s1ro = new RandomAccessObject.RandomAccessByteArrayObject(s1b);
     RandomAccessObject s2ro = new RandomAccessObject.RandomAccessByteArrayObject(s2b);
 
-    Assert.assertEquals(36, BsDiff.lengthOfMatch(s1ro, 0, s2ro, 0));
-    Assert.assertEquals(0, BsDiff.lengthOfMatch(s1ro, 5, s2ro, 0));
-    Assert.assertEquals(31, BsDiff.lengthOfMatch(s1ro, 5, s2ro, 5));
-    Assert.assertEquals(42, BsDiff.lengthOfMatch(s1ro, 37, s2ro, 39));
-    Assert.assertEquals(0, BsDiff.lengthOfMatch(s1ro, 38, s2ro, 39));
-    Assert.assertEquals(32, BsDiff.lengthOfMatch(s1ro, 47, s2ro, 49));
-    Assert.assertEquals(2, BsDiff.lengthOfMatch(s1ro, 90, s2ro, 83));
+    assertEquals(36, BsDiff.lengthOfMatch(s1ro, 0, s2ro, 0));
+    assertEquals(0, BsDiff.lengthOfMatch(s1ro, 5, s2ro, 0));
+    assertEquals(31, BsDiff.lengthOfMatch(s1ro, 5, s2ro, 5));
+    assertEquals(42, BsDiff.lengthOfMatch(s1ro, 37, s2ro, 39));
+    assertEquals(0, BsDiff.lengthOfMatch(s1ro, 38, s2ro, 39));
+    assertEquals(32, BsDiff.lengthOfMatch(s1ro, 47, s2ro, 49));
+    assertEquals(2, BsDiff.lengthOfMatch(s1ro, 90, s2ro, 83));
   }
 
   @Test
@@ -64,12 +63,12 @@ public class BsDiffTest {
         intArrayToRandomAccessObject(BsDiffTestData.SHORT_GROUP_ARRAY);
 
     BsDiff.Match ret = BsDiff.searchForMatchBaseCase(groupArrayRO, s1ro, s2ro, 0, 0, 12);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(12, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(12, ret.start);
 
     ret = BsDiff.searchForMatchBaseCase(groupArrayRO, s1ro, s2ro, 0, 9, 10);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(10, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(10, ret.start);
   }
 
   @Test
@@ -86,8 +85,8 @@ public class BsDiffTest {
             scan,
             0,
             BsDiffTestData.LONG_DATA_99.length);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(10, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(10, ret.start);
 
     ret =
         BsDiff.searchForMatchBaseCase(
@@ -97,8 +96,8 @@ public class BsDiffTest {
             scan,
             64,
             65);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(52, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(52, ret.start);
 
     ret =
         BsDiff.searchForMatchBaseCase(
@@ -108,8 +107,8 @@ public class BsDiffTest {
             scan,
             1,
             2);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(46, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(46, ret.start);
   }
 
   @Test
@@ -126,8 +125,8 @@ public class BsDiffTest {
             scan,
             0,
             BsDiffTestData.LONGER_DATA_349.length);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(246, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(246, ret.start);
 
     ret =
         BsDiff.searchForMatchBaseCase(
@@ -137,8 +136,8 @@ public class BsDiffTest {
             scan,
             219,
             220);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(251, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(251, ret.start);
   }
 
   @Test
@@ -153,8 +152,8 @@ public class BsDiffTest {
         intArrayToRandomAccessObject(BsDiffTestData.SHORT_GROUP_ARRAY);
 
     BsDiff.Match ret = BsDiff.searchForMatch(groupArrayRO, s1ro, s2ro, 0, 0, 12);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(10, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(10, ret.start);
   }
 
   @Test
@@ -171,8 +170,8 @@ public class BsDiffTest {
             scan,
             0,
             BsDiffTestData.LONG_DATA_99.length);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(52, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(52, ret.start);
   }
 
   @Test
@@ -189,8 +188,8 @@ public class BsDiffTest {
             scan,
             0,
             BsDiffTestData.LONGER_DATA_349.length);
-    Assert.assertEquals(0, ret.length);
-    Assert.assertEquals(251, ret.start);
+    assertEquals(0, ret.length);
+    assertEquals(251, ret.start);
   }
 
   @Test
@@ -221,16 +220,16 @@ public class BsDiffTest {
         for (int hi = lo + 1; hi <= size; ++hi) {
           byte[] query = Arrays.copyOfRange(bytes, lo, hi);
           int querySize = query.length;
-          Assert.assertEquals(querySize, hi - lo);
+          assertEquals(querySize, hi - lo);
           RandomAccessObject queryBuf = new RandomAccessObject.RandomAccessByteArrayObject(query);
 
           BsDiff.Match match = BsDiff.searchForMatch(suffixArray, input, queryBuf, 0, 0, size);
 
-          Assert.assertEquals(querySize, match.length);
-          Assert.assertTrue(match.start >= 0);
-          Assert.assertTrue(match.start <= size - match.length);
+          assertEquals(querySize, match.length);
+          assertTrue(match.start >= 0);
+          assertTrue(match.start <= size - match.length);
           byte[] suffix = Arrays.copyOfRange(bytes, match.start, match.start + match.length);
-          Assert.assertArrayEquals(query, suffix);
+          assertArrayEquals(query, suffix);
         }
       }
     }
@@ -246,8 +245,8 @@ public class BsDiffTest {
     BsDiffPatchWriter.generatePatch(oldData, newData, out);
 
     byte[] actualPatch = out.toByteArray();
-    Assert.assertEquals(actualPatch.length, expectedPatch.length);
-    Assert.assertArrayEquals(actualPatch, expectedPatch);
+    assertEquals(actualPatch.length, expectedPatch.length);
+    assertArrayEquals(actualPatch, expectedPatch);
   }
 
   @Test
@@ -260,8 +259,8 @@ public class BsDiffTest {
     BsDiffPatchWriter.generatePatch(oldData, newData, out);
 
     byte[] actualPatch = out.toByteArray();
-    Assert.assertEquals(actualPatch.length, expectedPatch.length);
-    Assert.assertArrayEquals(actualPatch, expectedPatch);
+    assertEquals(actualPatch.length, expectedPatch.length);
+    assertArrayEquals(actualPatch, expectedPatch);
   }
 
   /**
@@ -274,27 +273,27 @@ public class BsDiffTest {
       // Test that all of the characters are diffed if two strings are identical even if there
       // is no "valid match" because the strings are too short.
       CtrlEntry[] expectedCtrlEntries = {new CtrlEntry(2, 0, 0)};
-      Assert.assertTrue(generatePatchAndCheckCtrlEntries("aa", "aa", expectedCtrlEntries));
+      assertTrue(generatePatchAndCheckCtrlEntries("aa", "aa", expectedCtrlEntries));
     }
 
     {
       // Test that all of the characters are diffed if two strings are identical and are long
       // enough to be considered a "valid match".
       CtrlEntry[] expectedCtrlEntries = {new CtrlEntry(0, 0, 0), new CtrlEntry(3, 0, 0)};
-      Assert.assertTrue(generatePatchAndCheckCtrlEntries("aaa", "aaa", expectedCtrlEntries));
+      assertTrue(generatePatchAndCheckCtrlEntries("aaa", "aaa", expectedCtrlEntries));
     }
 
     {
       // Test that none of the characters are diffed if the strings do not match.
       CtrlEntry[] expectedCtrlEntries = {new CtrlEntry(0, 2, 0)};
-      Assert.assertTrue(generatePatchAndCheckCtrlEntries("aa", "bb", expectedCtrlEntries));
+      assertTrue(generatePatchAndCheckCtrlEntries("aa", "bb", expectedCtrlEntries));
     }
 
     {
       // Test that characters are diffed if the beginning of the strings match even if the match
       // is not long enough to be considered valid.
       CtrlEntry[] expectedCtrlEntries = {new CtrlEntry(2, 6, 3), new CtrlEntry(3, 0, 0)};
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries("aazzzbbb", "aaayyyyybbb", expectedCtrlEntries));
     }
 
@@ -302,7 +301,7 @@ public class BsDiffTest {
       // Test that none of the characters are diffed if the beginning of the strings do not
       // match and the available match is not long enough to be considered valid.
       CtrlEntry[] expectedCtrlEntries = {new CtrlEntry(0, 3, 0)};
-      Assert.assertTrue(generatePatchAndCheckCtrlEntries("zzzbb", "abb", expectedCtrlEntries));
+      assertTrue(generatePatchAndCheckCtrlEntries("zzzbb", "abb", expectedCtrlEntries));
     }
 
     {
@@ -313,7 +312,7 @@ public class BsDiffTest {
         new CtrlEntry(6, 3, 1), // 012345         | %^&
         new CtrlEntry(13, 0, 0) // abcdefghijklm  | n/a
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries(
               "@@012345@ab@de@ghijklm", "#012$45%^&abcdefghijklm", expectedCtrlEntries));
     }
@@ -326,7 +325,7 @@ public class BsDiffTest {
         new CtrlEntry(6, 3, -21), // 012345         | %^&
         new CtrlEntry(13, 0, 0) // abcdefghijklm  | n/a
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries(
               "@ab@de@ghijklm@@012345", "#012$45%^&abcdefghijklm", expectedCtrlEntries));
     }
@@ -339,7 +338,7 @@ public class BsDiffTest {
       CtrlEntry[] expectedCtrlEntries = {
         new CtrlEntry(0, 0, 5), new CtrlEntry(4, 0, 17), new CtrlEntry(13, 0, 0),
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries(
               "012345678901234567890nexus9nexus5nexus6", "567@9n1x3s56exus6", expectedCtrlEntries));
     }
@@ -350,7 +349,7 @@ public class BsDiffTest {
       CtrlEntry[] expectedCtrlEntries = {
         new CtrlEntry(0, 8, 0), new CtrlEntry(3, 0, 3), new CtrlEntry(3, 0, 0),
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries(
               "aaazzzbbbbbbbb", "bb@bb@bbaaabbb", expectedCtrlEntries));
     }
@@ -361,7 +360,7 @@ public class BsDiffTest {
       CtrlEntry[] expectedCtrlEntries = {
         new CtrlEntry(0, 0, 0), new CtrlEntry(3, 0, 11), new CtrlEntry(3, 8, 0),
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries(
               "aaaaaaaaaaazzzbbb", "aaabbbaa@aa@aa", expectedCtrlEntries));
     }
@@ -371,7 +370,7 @@ public class BsDiffTest {
       CtrlEntry[] expectedCtrlEntries = {
         new CtrlEntry(0, 0, 0), new CtrlEntry(9, 0, 0),
       };
-      Assert.assertTrue(
+      assertTrue(
           generatePatchAndCheckCtrlEntries("abcdefghi", "ab@def@hi", expectedCtrlEntries));
     }
   }

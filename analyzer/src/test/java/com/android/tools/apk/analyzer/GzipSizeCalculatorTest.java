@@ -22,18 +22,11 @@ import com.android.testutils.TestResources;
 import com.android.tools.apk.analyzer.internal.GzipSizeCalculator;
 import java.nio.file.Path;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class GzipSizeCalculatorTest {
-    private ApkSizeCalculator calculator;
-    private Path apk;
-
-    @Before
-    public void setup() {
-        apk = TestResources.getFile("/test.apk").toPath();
-        calculator = new GzipSizeCalculator();
-    }
+    private final ApkSizeCalculator calculator = new GzipSizeCalculator();
+    private final Path apk = TestResources.getFile("/test.apk").toPath();
 
     @Test
     public void getFullApkDownloadSize() {

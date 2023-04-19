@@ -17,12 +17,12 @@ package com.android.tools.apk.analyzer.diff.generator;
 import com.android.tools.apk.analyzer.diff.shared.UnitTestZipArchive;
 import com.android.tools.apk.analyzer.diff.shared.UnitTestZipEntry;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,13 +33,11 @@ import java.util.zip.CRC32;
 /**
  * Tests for {@link MinimalZipParser}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class MinimalZipArchiveTest {
   private byte[] unitTestZipArchive;
   private File tempFile;
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     unitTestZipArchive = UnitTestZipArchive.makeTestZip();
     tempFile = File.createTempFile("MinimalZipArchiveTest", "zip");
@@ -59,7 +57,7 @@ public class MinimalZipArchiveTest {
     }
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (tempFile != null) {
       try {
@@ -78,33 +76,33 @@ public class MinimalZipArchiveTest {
     for (int x = 0; x < UnitTestZipArchive.allEntriesInFileOrder.size(); x++) {
       UnitTestZipEntry expected = UnitTestZipArchive.allEntriesInFileOrder.get(x);
       MinimalZipEntry actual = parsedEntries.get(x);
-      Assert.assertEquals(expected.path, actual.getFileName());
-      Assert.assertEquals(expected.level == 0 ? 0 : 8, actual.getCompressionMethod());
-      Assert.assertEquals(expected.getCompressedBinaryContent().length, actual.getCompressedSize());
-      Assert.assertEquals(
+      assertEquals(expected.path, actual.getFileName());
+      assertEquals(expected.level == 0 ? 0 : 8, actual.getCompressionMethod());
+      assertEquals(expected.getCompressedBinaryContent().length, actual.getCompressedSize());
+      assertEquals(
           expected.getUncompressedBinaryContent().length, actual.getUncompressedSize());
-      Assert.assertEquals(false, actual.getGeneralPurposeFlagBit11());
+      assertEquals(false, actual.getGeneralPurposeFlagBit11());
       CRC32 crc32 = new CRC32();
       crc32.update(expected.getUncompressedBinaryContent());
-      Assert.assertEquals(crc32.getValue(), actual.getCrc32OfUncompressedData());
+      assertEquals(crc32.getValue(), actual.getCrc32OfUncompressedData());
 
       // Offset verification is a little trickier
       // 1. Verify that the offsets are in ascending order and increasing.
-      Assert.assertTrue(actual.getFileOffsetOfLocalEntry() > lastSeenHeaderOffset);
+      assertTrue(actual.getFileOffsetOfLocalEntry() > lastSeenHeaderOffset);
       lastSeenHeaderOffset = actual.getFileOffsetOfLocalEntry();
 
       // 2. Verify that the local signature header is at the calculated position
       byte[] expectedSignatureBlock = new byte[] {0x50, 0x4b, 0x03, 0x04};
       for (int index = 0; index < 4; index++) {
         byte actualByte = unitTestZipArchive[((int) actual.getFileOffsetOfLocalEntry()) + index];
-        Assert.assertEquals(expectedSignatureBlock[index], actualByte);
+        assertEquals(expectedSignatureBlock[index], actualByte);
       }
 
       // 3. Verify that the data is at the calculated position
       byte[] expectedContent = expected.getCompressedBinaryContent();
       int calculatedDataOffset = (int) actual.getFileOffsetOfCompressedData();
       for (int index = 0; index < expectedContent.length; index++) {
-        Assert.assertEquals(
+        assertEquals(
             expectedContent[index], unitTestZipArchive[calculatedDataOffset + index]);
       }
     }

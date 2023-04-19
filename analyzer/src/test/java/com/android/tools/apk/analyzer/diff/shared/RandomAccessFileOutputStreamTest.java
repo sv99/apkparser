@@ -14,12 +14,13 @@
 
 package com.android.tools.apk.analyzer.diff.shared;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -30,8 +31,6 @@ import java.io.RandomAccessFile;
 /**
  * Tests for {@link RandomAccessFileOutputStream}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class RandomAccessFileOutputStreamTest {
   /**
    * The object under test.
@@ -48,7 +47,7 @@ public class RandomAccessFileOutputStreamTest {
    */
   private File tempFile = null;
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     testData = new byte[128];
     for (int x = 0; x < 128; x++) {
@@ -58,7 +57,7 @@ public class RandomAccessFileOutputStreamTest {
     tempFile.deleteOnExit();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     try {
       stream.close();
@@ -75,23 +74,25 @@ public class RandomAccessFileOutputStreamTest {
   @Test
   public void testCreateAndSize() throws IOException {
     stream = new RandomAccessFileOutputStream(tempFile, 11L);
-    Assert.assertEquals(11, tempFile.length());
+    assertEquals(11, tempFile.length());
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testCreateAndFailToSize() throws IOException {
-    stream =
-        new RandomAccessFileOutputStream(tempFile, 11L) {
-          @Override
-          protected RandomAccessFile getRandomAccessFile(File file) throws IOException {
-            return new RandomAccessFile(file, "rw") {
-              @Override
-              public void setLength(long newLength) throws IOException {
-                // Do nothing, to trigger failure case in the constructor.
-              }
-            };
-          }
-        };
+    assertThrows(IOException.class, () -> {
+      stream =
+              new RandomAccessFileOutputStream(tempFile, 11L) {
+                @Override
+                protected RandomAccessFile getRandomAccessFile(File file) throws IOException {
+                  return new RandomAccessFile(file, "rw") {
+                    @Override
+                    public void setLength(long newLength) throws IOException {
+                      // Do nothing, to trigger failure case in the constructor.
+                    }
+                  };
+                }
+              };
+    });
   }
 
   @Test
@@ -103,7 +104,7 @@ public class RandomAccessFileOutputStreamTest {
     FileInputStream in = null;
     try {
       in = new FileInputStream(tempFile);
-      Assert.assertEquals(7, in.read());
+      assertEquals(7, in.read());
     } finally {
       try {
         in.close();
@@ -126,7 +127,7 @@ public class RandomAccessFileOutputStreamTest {
       dataIn = new DataInputStream(in);
       byte[] actual = new byte[testData.length];
       dataIn.readFully(actual);
-      Assert.assertArrayEquals(testData, actual);
+      assertArrayEquals(testData, actual);
     } finally {
       if (dataIn != null) {
         try {

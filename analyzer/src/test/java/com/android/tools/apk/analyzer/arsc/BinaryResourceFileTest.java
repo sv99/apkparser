@@ -16,13 +16,11 @@
 
 package com.android.tools.apk.analyzer.arsc;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import com.android.testutils.TestResources;
 import com.google.common.io.ByteStreams;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -36,7 +34,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-@RunWith(JUnit4.class)
 /** Tests {@link BinaryResourceFile}. */
 public final class BinaryResourceFileTest {
 

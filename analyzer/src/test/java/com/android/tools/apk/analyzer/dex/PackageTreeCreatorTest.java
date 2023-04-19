@@ -16,7 +16,7 @@
 package com.android.tools.apk.analyzer.dex;
 
 import static com.android.tools.apk.analyzer.dex.DexFiles.getDexFile;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.android.annotations.NonNull;
 import com.android.testutils.TestResources;
@@ -33,7 +33,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PackageTreeCreatorTest {
     @Test

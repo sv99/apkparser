@@ -14,16 +14,15 @@
 
 package com.android.tools.apk.analyzer.diff.shared;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DefaultDeflateCompatibilityWindow}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class JreDeflateParametersTest {
 
   @Test
@@ -40,7 +39,7 @@ public class JreDeflateParametersTest {
   private void assertIllegalArgumentException(int level, int strategy, boolean nowrap) {
     try {
       JreDeflateParameters.of(level, strategy, nowrap);
-      Assert.fail("Invalid configuration allowed");
+      fail("Invalid configuration allowed");
     } catch (IllegalArgumentException expected) {
       // Pass
     }
@@ -59,7 +58,7 @@ public class JreDeflateParametersTest {
   @Test
   public void testToString() {
     // Ensure that toString() doesn't crash and produces a non-empty string.
-    Assert.assertTrue(JreDeflateParameters.of(1, 0, true).toString().length() > 0);
+    assertTrue(JreDeflateParameters.of(1, 0, true).toString().length() > 0);
   }
 
   @Test
@@ -70,7 +69,7 @@ public class JreDeflateParametersTest {
           JreDeflateParameters params = JreDeflateParameters.of(level, strategy, nowrap);
           String asString = params.toString();
           JreDeflateParameters fromString = JreDeflateParameters.parseString(asString);
-          Assert.assertEquals(params, fromString);
+          assertEquals(params, fromString);
         }
       }
     }

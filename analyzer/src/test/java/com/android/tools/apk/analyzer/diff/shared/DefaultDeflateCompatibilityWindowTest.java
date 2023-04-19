@@ -16,17 +16,20 @@ package com.android.tools.apk.analyzer.diff.shared;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DefaultDeflateCompatibilityWindow}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class DefaultDeflateCompatibilityWindowTest {
 
   private DefaultDeflateCompatibilityWindow window = null;
@@ -47,7 +50,7 @@ public class DefaultDeflateCompatibilityWindowTest {
     }
   }
 
-  private class InfallibleCompatibilityWindow extends DefaultDeflateCompatibilityWindow {
+  private static class InfallibleCompatibilityWindow extends DefaultDeflateCompatibilityWindow {
     @Override
     public Map<JreDeflateParameters, String> getBaselineValues() {
       // Using the system values for the baseline means the baseline will always match :)
@@ -55,7 +58,7 @@ public class DefaultDeflateCompatibilityWindowTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     window = new DefaultDeflateCompatibilityWindow();
   }
@@ -77,27 +80,27 @@ public class DefaultDeflateCompatibilityWindowTest {
   private void ensureHasAllKeys(Map<JreDeflateParameters, String> mappings) {
     for (int level = 1; level <= 9; level++) {
       for (int strategy = 0; strategy <= 1; strategy++) {
-        Assert.assertTrue(mappings.containsKey(JreDeflateParameters.of(level, strategy, true)));
-        Assert.assertTrue(mappings.containsKey(JreDeflateParameters.of(level, strategy, false)));
+        assertTrue(mappings.containsKey(JreDeflateParameters.of(level, strategy, true)));
+        assertTrue(mappings.containsKey(JreDeflateParameters.of(level, strategy, false)));
       }
     }
     // Manually scan for presence of the strategy-2 values, only set for compression level 1....
-    Assert.assertTrue(mappings.containsKey(JreDeflateParameters.of(1, 2, true)));
-    Assert.assertTrue(mappings.containsKey(JreDeflateParameters.of(1, 2, false)));
-    Assert.assertEquals(38, mappings.size());
+    assertTrue(mappings.containsKey(JreDeflateParameters.of(1, 2, true)));
+    assertTrue(mappings.containsKey(JreDeflateParameters.of(1, 2, false)));
+    assertEquals(38, mappings.size());
   }
 
   @Test
   public void testGetCorpus() {
     // Basic sanity test: ensure it's a non-null, non-empty return.
     byte[] corpus1 = window.getCorpus();
-    Assert.assertNotNull(corpus1);
-    Assert.assertTrue(corpus1.length > 0);
+    assertNotNull(corpus1);
+    assertTrue(corpus1.length > 0);
     // Basic sanity test: ensure the corpus is distinct each time the method is called (i.e., the
     // mutable object returned is independent of the actual corpus).
     byte[] corpus2 = window.getCorpus();
-    Assert.assertArrayEquals(corpus1, corpus2);
-    Assert.assertNotSame(corpus1, corpus2);
+    assertArrayEquals(corpus1, corpus2);
+    assertNotSame(corpus1, corpus2);
   }
 
   @Test
@@ -106,22 +109,22 @@ public class DefaultDeflateCompatibilityWindowTest {
     window.isCompatible();
     // Now do a call that is guaranteed to fail.
     BrokenCompatibilityWindow broken = new BrokenCompatibilityWindow();
-    Assert.assertFalse(broken.isCompatible());
+    assertFalse(broken.isCompatible());
     // Now do a call that is guaranteed to succeed.
     InfallibleCompatibilityWindow infallible = new InfallibleCompatibilityWindow();
-    Assert.assertTrue(infallible.isCompatible());
+    assertTrue(infallible.isCompatible());
   }
 
   @Test
   public void testGetIncompatibleValues() {
     // First do a coverage-only call, as it's not safe to assume compatibility in the unit test.
-    Assert.assertNotNull(window.getIncompatibleValues());
+    assertNotNull(window.getIncompatibleValues());
     // Now do a call that is guaranteed to produce failure data.
     BrokenCompatibilityWindow brokenWindow = new BrokenCompatibilityWindow();
     Map<JreDeflateParameters, String> incompatible = brokenWindow.getIncompatibleValues();
-    Assert.assertTrue(incompatible.containsKey(brokenParameters));
+    assertTrue(incompatible.containsKey(brokenParameters));
     // Now do a call that is guaranteed to produce no failure data.
     InfallibleCompatibilityWindow infallible = new InfallibleCompatibilityWindow();
-    Assert.assertTrue(infallible.getIncompatibleValues().isEmpty());
+    assertTrue(infallible.getIncompatibleValues().isEmpty());
   }
 }

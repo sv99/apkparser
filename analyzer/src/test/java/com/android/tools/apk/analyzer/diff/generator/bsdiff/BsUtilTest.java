@@ -14,17 +14,17 @@
 
 package com.android.tools.apk.analyzer.diff.generator.bsdiff;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-@RunWith(JUnit4.class)
 public class BsUtilTest {
   @Test
   public void writeFormattedLongTest() throws IOException {
@@ -51,7 +51,7 @@ public class BsUtilTest {
       (byte) 0,
       (byte) 0
     };
-    Assert.assertArrayEquals(expected, actual);
+    assertArrayEquals(expected, actual);
   }
 
   @Test
@@ -76,8 +76,8 @@ public class BsUtilTest {
     };
     ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
 
-    Assert.assertEquals(0x12345678, BsUtil.readFormattedLong(inputStream));
-    Assert.assertEquals(0x0eadbeef, BsUtil.readFormattedLong(inputStream));
+    assertEquals(0x12345678, BsUtil.readFormattedLong(inputStream));
+    assertEquals(0x0eadbeef, BsUtil.readFormattedLong(inputStream));
   }
 
   private long writeThenReadFormattedLong(long value) throws IOException {
@@ -90,11 +90,11 @@ public class BsUtilTest {
 
   @Test
   public void writeThenReadFormattedLongTest() throws IOException {
-    Assert.assertEquals(-1, writeThenReadFormattedLong(-1));
-    Assert.assertEquals(0x7fffffff, writeThenReadFormattedLong(0x7fffffff));
-    Assert.assertEquals(0, writeThenReadFormattedLong(0));
-    Assert.assertEquals(Long.MAX_VALUE, writeThenReadFormattedLong(Long.MAX_VALUE));
-    Assert.assertEquals(Long.MIN_VALUE, writeThenReadFormattedLong(Long.MIN_VALUE));
+    assertEquals(-1, writeThenReadFormattedLong(-1));
+    assertEquals(0x7fffffff, writeThenReadFormattedLong(0x7fffffff));
+    assertEquals(0, writeThenReadFormattedLong(0));
+    assertEquals(Long.MAX_VALUE, writeThenReadFormattedLong(Long.MAX_VALUE));
+    assertEquals(Long.MIN_VALUE, writeThenReadFormattedLong(Long.MIN_VALUE));
   }
 
   @Test
@@ -107,24 +107,24 @@ public class BsUtilTest {
     RandomAccessObject s2ro = new RandomAccessObject.RandomAccessByteArrayObject(s2b);
 
     int r = BsUtil.lexicographicalCompare(s1ro, 0, s1b.length, s2ro, 0, s2b.length);
-    Assert.assertTrue(r > 0);
+    assertTrue(r > 0);
 
     r = BsUtil.lexicographicalCompare(s1ro, 5, s1b.length - 5, s2ro, 5, s2b.length - 5);
-    Assert.assertTrue(r < 0);
+    assertTrue(r < 0);
 
     r = BsUtil.lexicographicalCompare(s1ro, 7, s1b.length - 7, s2ro, 8, s2b.length - 7);
-    Assert.assertTrue(r < 0);
+    assertTrue(r < 0);
 
     r = BsUtil.lexicographicalCompare(s1ro, 7, s1b.length - 8, s2ro, 8, s2b.length - 8);
-    Assert.assertTrue(r < 0);
+    assertTrue(r < 0);
 
     r = BsUtil.lexicographicalCompare(s1ro, 0, 2, s2ro, 0, 2);
-    Assert.assertEquals(0, r);
+    assertEquals(0, r);
 
     r = BsUtil.lexicographicalCompare(s1ro, 0, 1, s2ro, 0, 2);
-    Assert.assertTrue(r < 0);
+    assertTrue(r < 0);
 
     r = BsUtil.lexicographicalCompare(s1ro, 0, 2, s2ro, 0, 1);
-    Assert.assertTrue(r > 0);
+    assertTrue(r > 0);
   }
 }

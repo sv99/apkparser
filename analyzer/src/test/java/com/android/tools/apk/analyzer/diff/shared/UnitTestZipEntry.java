@@ -17,7 +17,7 @@ package com.android.tools.apk.analyzer.diff.shared;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Data for one entry in the zip returned by {@link UnitTestZipArchive#makeTestZip()}.
@@ -84,11 +84,7 @@ public class UnitTestZipEntry {
    * @return as described
    */
   public byte[] getUncompressedBinaryContent() {
-    try {
-      return content.getBytes("US-ASCII");
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("System doesn't support US-ASCII"); // Not likely
-    }
+    return content.getBytes(StandardCharsets.US_ASCII);
   }
 
   /**

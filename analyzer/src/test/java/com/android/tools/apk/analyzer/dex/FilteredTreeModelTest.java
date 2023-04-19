@@ -16,7 +16,7 @@
 package com.android.tools.apk.analyzer.dex;
 
 import static com.android.tools.apk.analyzer.dex.DexFiles.getDexFile;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.android.annotations.NonNull;
 import com.android.testutils.TestResources;
@@ -32,7 +32,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import javax.swing.tree.TreeModel;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FilteredTreeModelTest {
 
@@ -47,7 +47,7 @@ public class FilteredTreeModelTest {
         options.setShowMethods(true);
         options.setShowReferencedNodes(true);
 
-        FilteredTreeModel filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
+        FilteredTreeModel<DexElementNode> filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
 
         StringBuffer sb = new StringBuffer(100);
         dumpTree(sb, filteredTreeModel, packageTreeNode, 0);
@@ -126,7 +126,7 @@ public class FilteredTreeModelTest {
         options.setShowFields(true);
         options.setShowMethods(true);
         options.setShowReferencedNodes(false);
-        FilteredTreeModel filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
+        FilteredTreeModel<DexElementNode> filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
 
         StringBuffer sb = new StringBuffer(100);
         dumpTree(sb, filteredTreeModel, packageTreeNode, 0);
@@ -156,7 +156,7 @@ public class FilteredTreeModelTest {
         options.setShowFields(false);
         options.setShowMethods(true);
         options.setShowReferencedNodes(true);
-        FilteredTreeModel filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
+        FilteredTreeModel<DexElementNode> filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
 
         StringBuffer sb = new StringBuffer(100);
         dumpTree(sb, filteredTreeModel, packageTreeNode, 0);
@@ -210,7 +210,7 @@ public class FilteredTreeModelTest {
         options.setShowMethods(true);
         options.setShowReferencedNodes(true);
         options.setShowRemovedNodes(false);
-        FilteredTreeModel filteredTreeModel = new FilteredTreeModel(packageTreeNode, options);
+        FilteredTreeModel<DexElementNode> filteredTreeModel = new FilteredTreeModel<>(packageTreeNode, options);
 
         StringBuffer sb = new StringBuffer(100);
         dumpTree(sb, filteredTreeModel, packageTreeNode, 0);

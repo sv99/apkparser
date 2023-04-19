@@ -16,7 +16,7 @@
 
 package com.android.tools.apk.analyzer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,9 +27,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 /** Tests for {@link ApkAnalyzerCli} */
@@ -42,12 +44,31 @@ public class ApkAnalyzerImplTest {
     private AaptInvoker aaptInvoker;
     private Path apk;
 
-    @Before
+    private static String trimEnd(String s) {
+        if (s.endsWith("\t/")) {
+            return s;
+        }
+        if (s.endsWith("/")) {
+            return s.substring(0, s.length() - 1);
+        }
+        return s;
+    }
+
+    @BeforeEach
     public void setUp() throws Exception {
         baos = new ByteArrayOutputStream() {
             @Override
             public synchronized String toString() {
-                return super.toString().replace(LINE_SEPARATOR, "\n");
+                // Java 8, 11: directory node ended with "/"
+                // Java 17: not ended
+                // Unify result for all platform: strip end "/" if exists
+                // don't replace root node path and add \n in the end
+                // return super.toString().replace(LINE_SEPARATOR, "\n");
+                String res = Arrays.stream(super.toString()
+                        .split(LINE_SEPARATOR))
+                        .map(ApkAnalyzerImplTest::trimEnd)
+                        .collect(Collectors.joining("\n"));
+                return res + "\n";
             }
         };
         PrintStream ps = new PrintStream(baos);
@@ -56,7 +77,11 @@ public class ApkAnalyzerImplTest {
         impl = new ApkAnalyzerImpl(ps, aaptInvoker);
     }
 
-    @Test
+    @AfterEach
+    public void tearDown() throws Exception {
+        baos.reset();
+    }
+            @Test
     public void resPackagesTest() throws IOException {
         impl.resPackages(apk);
         assertEquals("com.example.helloworld\n", baos.toString());
@@ -196,8 +221,7 @@ public class ApkAnalyzerImplTest {
                         + "\n"
                         + "    .line 16\n"
                         + "    return-void\n"
-                        + ".end method\n"
-                        + "\n",
+                        + ".end method\n",
                 baos.toString());
         baos.reset();
         impl.dexCode(
@@ -222,8 +246,7 @@ public class ApkAnalyzerImplTest {
                         + "\n"
                         + "    .line 16\n"
                         + "    return-void\n"
-                        + ".end method\n"
-                        + "\n",
+                        + ".end method\n",
                 baos.toString());
     }
 
@@ -304,8 +327,7 @@ public class ApkAnalyzerImplTest {
                         + "\n"
                         + "    .line 16\n"
                         + "    return-void\n"
-                        + ".end method\n"
-                        + "\n",
+                        + ".end method\n",
                 baos.toString());
         baos.reset();
         impl.dexCode(
@@ -330,8 +352,7 @@ public class ApkAnalyzerImplTest {
                         + "\n"
                         + "    .line 16\n"
                         + "    return-void\n"
-                        + ".end method\n"
-                        + "\n",
+                        + ".end method\n",
                 baos.toString());
     }
 
@@ -543,12 +564,12 @@ public class ApkAnalyzerImplTest {
         impl.apkCompare(apk, apk2, false, false, false);
         assertEquals(
                 "960\t649\t-311\t/\n"
-                        + "6\t6\t0\t/res/\n"
-                        + "6\t6\t0\t/res/anim/\n"
+                        + "6\t6\t0\t/res\n"
+                        + "6\t6\t0\t/res/anim\n"
                         + "6\t6\t0\t/res/anim/fade.xml\n"
                         + "13\t13\t0\t/AndroidManifest.xml\n"
                         + "352\t0\t-352\t/instant-run.zip\n"
-                        + "2\t0\t-2\t/instant-run.zip/instant-run/\n"
+                        + "2\t0\t-2\t/instant-run.zip/instant-run\n"
                         + "2\t0\t-2\t/instant-run.zip/instant-run/classes1.dex\n",
                 baos.toString());
     }
@@ -561,10 +582,10 @@ public class ApkAnalyzerImplTest {
         assertEquals(
                 "649\t960\t158\t/\n"
                         + "0\t352\t158\t/instant-run.zip\n"
-                        + "0\t2\t0\t/instant-run.zip/instant-run/\n"
+                        + "0\t2\t0\t/instant-run.zip/instant-run\n"
                         + "0\t2\t0\t/instant-run.zip/instant-run/classes1.dex\n"
-                        + "6\t6\t0\t/res/\n"
-                        + "6\t6\t0\t/res/anim/\n"
+                        + "6\t6\t0\t/res\n"
+                        + "6\t6\t0\t/res/anim\n"
                         + "6\t6\t0\t/res/anim/fade.xml\n"
                         + "13\t13\t0\t/AndroidManifest.xml\n",
                 baos.toString());
@@ -575,14 +596,14 @@ public class ApkAnalyzerImplTest {
         impl.filesList(apk, true, true, false);
         assertEquals(
                 "4157\t3476\t/\n"
-                        + "1568\t1568\t/META-INF/\n"
+                        + "1568\t1568\t/META-INF\n"
                         + "1054\t1054\t/META-INF/CERT.RSA\n"
                         + "264\t264\t/META-INF/CERT.SF\n"
                         + "250\t250\t/META-INF/MANIFEST.MF\n"
                         + "703\t703\t/classes.dex\n"
                         + "936\t255\t/resources.arsc\n"
-                        + "312\t312\t/res/\n"
-                        + "312\t312\t/res/layout/\n"
+                        + "312\t312\t/res\n"
+                        + "312\t312\t/res/layout\n"
                         + "312\t312\t/res/layout/main.xml\n"
                         + "638\t638\t/AndroidManifest.xml\n",
                 baos.toString());

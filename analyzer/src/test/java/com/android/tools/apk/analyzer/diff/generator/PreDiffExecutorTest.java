@@ -25,18 +25,20 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link PreDiffExecutor}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class PreDiffExecutorTest {
   private static final UnitTestZipEntry ENTRY_LEVEL_6 =
       UnitTestZipArchive.makeUnitTestZipEntry("/for/great/justice", 6, "entry A", null);
@@ -47,14 +49,14 @@ public class PreDiffExecutorTest {
   private File deltaFriendlyOldFile;
   private File deltaFriendlyNewFile;
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     tempFilesCreated = new LinkedList<File>();
     deltaFriendlyOldFile = newTempFile();
     deltaFriendlyNewFile = newTempFile();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     for (File file : tempFilesCreated) {
       try {
@@ -98,7 +100,7 @@ public class PreDiffExecutorTest {
         return entry;
       }
     }
-    Assert.fail("path not found: " + path);
+    fail("path not found: " + path);
     return null; // Never executed
   }
 
@@ -112,10 +114,10 @@ public class PreDiffExecutorTest {
   }
 
   private void assertFileEquals(File file1, File file2) throws IOException {
-    Assert.assertEquals(file1.length(), file2.length());
+    assertEquals(file1.length(), file2.length());
     byte[] content1 = readFile(file1);
     byte[] content2 = readFile(file2);
-    Assert.assertArrayEquals(content1, content2);
+    assertArrayEquals(content1, content2);
   }
 
   @Test
@@ -129,11 +131,11 @@ public class PreDiffExecutorTest {
             .writingDeltaFriendlyFiles(deltaFriendlyOldFile, deltaFriendlyNewFile)
             .build();
     PreDiffPlan plan = executor.prepareForDiffing();
-    Assert.assertNotNull(plan);
+    assertNotNull(plan);
     // The plan should be to leave everything alone because there is no change.
-    Assert.assertTrue(plan.getOldFileUncompressionPlan().isEmpty());
-    Assert.assertTrue(plan.getNewFileUncompressionPlan().isEmpty());
-    Assert.assertTrue(plan.getDeltaFriendlyNewFileRecompressionPlan().isEmpty());
+    assertTrue(plan.getOldFileUncompressionPlan().isEmpty());
+    assertTrue(plan.getNewFileUncompressionPlan().isEmpty());
+    assertTrue(plan.getDeltaFriendlyNewFileRecompressionPlan().isEmpty());
     // Because nothing has changed, the delta-friendly files should be exact matches for the
     // original files.
     assertFileEquals(oldFile, deltaFriendlyOldFile);
@@ -152,14 +154,14 @@ public class PreDiffExecutorTest {
             .writingDeltaFriendlyFiles(deltaFriendlyOldFile, deltaFriendlyNewFile)
             .build();
     PreDiffPlan plan = executor.prepareForDiffing();
-    Assert.assertNotNull(plan);
+    assertNotNull(plan);
     // The plan should be to uncompress the data in both the old and new files.
-    Assert.assertEquals(1, plan.getOldFileUncompressionPlan().size());
-    Assert.assertEquals(1, plan.getNewFileUncompressionPlan().size());
-    Assert.assertEquals(1, plan.getDeltaFriendlyNewFileRecompressionPlan().size());
+    assertEquals(1, plan.getOldFileUncompressionPlan().size());
+    assertEquals(1, plan.getNewFileUncompressionPlan().size());
+    assertEquals(1, plan.getDeltaFriendlyNewFileRecompressionPlan().size());
     // The delta-friendly files should be larger than the originals.
-    Assert.assertTrue(oldFile.length() < deltaFriendlyOldFile.length());
-    Assert.assertTrue(newFile.length() < deltaFriendlyNewFile.length());
+    assertTrue(oldFile.length() < deltaFriendlyOldFile.length());
+    assertTrue(newFile.length() < deltaFriendlyNewFile.length());
 
     // Nitty-gritty, assert that the file content is exactly what is expected.
     // 1. Find the entry in the old file.
@@ -182,7 +184,7 @@ public class PreDiffExecutorTest {
       expectedDeltaFriendlyOldFileBytes.write(oldBytes, oldRemainderOffset, oldRemainderLength);
       byte[] expectedOld = expectedDeltaFriendlyOldFileBytes.toByteArray();
       byte[] actualOld = readFile(deltaFriendlyOldFile);
-      Assert.assertArrayEquals(expectedOld, actualOld);
+      assertArrayEquals(expectedOld, actualOld);
     }
 
     // Now do the same for the new file and new entry
@@ -198,7 +200,7 @@ public class PreDiffExecutorTest {
       expectedDeltaFriendlyNewFileBytes.write(newBytes, newRemainderOffset, newRemainderLength);
       byte[] expectedNew = expectedDeltaFriendlyNewFileBytes.toByteArray();
       byte[] actualNew = readFile(deltaFriendlyNewFile);
-      Assert.assertArrayEquals(expectedNew, actualNew);
+      assertArrayEquals(expectedNew, actualNew);
     }
   }
 
@@ -218,11 +220,11 @@ public class PreDiffExecutorTest {
             .withRecommendationModifier(limiter)
             .build();
     PreDiffPlan plan = executor.prepareForDiffing();
-    Assert.assertNotNull(plan);
+    assertNotNull(plan);
     // The plan should be to leave everything alone because of the limiter
-    Assert.assertTrue(plan.getOldFileUncompressionPlan().isEmpty());
-    Assert.assertTrue(plan.getNewFileUncompressionPlan().isEmpty());
-    Assert.assertTrue(plan.getDeltaFriendlyNewFileRecompressionPlan().isEmpty());
+    assertTrue(plan.getOldFileUncompressionPlan().isEmpty());
+    assertTrue(plan.getNewFileUncompressionPlan().isEmpty());
+    assertTrue(plan.getDeltaFriendlyNewFileRecompressionPlan().isEmpty());
     // Because nothing has changed, the delta-friendly files should be exact matches for the
     // original files.
     assertFileEquals(oldFile, deltaFriendlyOldFile);

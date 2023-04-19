@@ -14,12 +14,12 @@
 
 package com.android.tools.apk.analyzer.diff.generator;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.android.tools.apk.analyzer.diff.shared.UnitTestZipArchive;
 import java.io.ByteArrayOutputStream;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
+
 
 /**
  * Tests for {@link FileByFileV1DeltaGenerator}. This relies heavily on the correctness of {@link
@@ -30,8 +30,6 @@ import org.junit.runners.JUnit4;
  * of functionality together to create a patch; so the tests here are just ensuring that a patch can
  * be produced.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class FileByFileV1DeltaGeneratorTest {
 
   @Test
@@ -46,6 +44,6 @@ public class FileByFileV1DeltaGeneratorTest {
       generator.generateDelta(oldArchive.file, newArchive.file, buffer);
     }
     byte[] result = buffer.toByteArray();
-    Assert.assertTrue(result.length > 0);
+    assertTrue(result.length > 0);
   }
 }

@@ -14,19 +14,17 @@
 
 package com.android.tools.apk.analyzer.diff.generator;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Tests for {@link MatchingOutputStream}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class MatchingOutputStreamTest {
   /**
    * The data to write to the stream.
@@ -43,7 +41,7 @@ public class MatchingOutputStreamTest {
    */
   private MatchingOutputStream outputStream;
 
-  @Before
+  @BeforeEach
   public void setup() {
     data = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     inputStream = new ByteArrayInputStream(data);
@@ -81,47 +79,61 @@ public class MatchingOutputStreamTest {
     outputStream.expectEof();
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testWrite_OneByte_MatchFail() throws IOException {
-    outputStream.write(0);
-    outputStream.write(77);
+    assertThrows(MismatchException.class, () -> {
+      outputStream.write(0);
+      outputStream.write(77);
+    });
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testWrite_OneByte_StreamFail() throws IOException {
     // Write one byte more than the data match stream contains
-    for (int x = 0; x <= data.length; x++) {
-      outputStream.write(x);
-    }
+    assertThrows(MismatchException.class, () -> {
+      for (int x = 0; x <= data.length; x++) {
+        outputStream.write(x);
+      }
+    });
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testWrite_WholeBuffer_Fail() throws IOException {
-    byte[] tweaked = new byte[] {0, 1, 2, 3, 4, 55, 6, 7, 8, 9};
-    outputStream.write(tweaked);
+    assertThrows(MismatchException.class, () -> {
+      byte[] tweaked = new byte[]{0, 1, 2, 3, 4, 55, 6, 7, 8, 9};
+      outputStream.write(tweaked);
+    });
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testWrite_PartialBuffer_Fail() throws IOException {
-    byte[] tweaked = new byte[] {0, 1, 2, 3, 4, 55, 6, 7, 8, 9};
-    outputStream.write(tweaked, 0, 8);
+    assertThrows(MismatchException.class, () -> {
+      byte[] tweaked = new byte[]{0, 1, 2, 3, 4, 55, 6, 7, 8, 9};
+      outputStream.write(tweaked, 0, 8);
+    });
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testExpectEof_Fail() throws IOException {
-    outputStream.write(data, 0, data.length - 1);
-    outputStream.expectEof();
+    assertThrows(MismatchException.class, () -> {
+      outputStream.write(data, 0, data.length - 1);
+      outputStream.expectEof();
+    });
   }
 
-  @Test(expected = MismatchException.class)
+  @Test
   public void testWrite_PastEndOfMatchStream() throws IOException {
-    outputStream.write(data);
-    outputStream.write(data);
+    assertThrows(MismatchException.class, () -> {
+      outputStream.write(data);
+      outputStream.write(data);
+    });
   }
 
-  @SuppressWarnings({"resource", "unused"})
-  @Test(expected = IllegalArgumentException.class)
+//  @SuppressWarnings({"resource", "unused"})
+  @Test
   public void testConstructor_BadMatchBufferLength() {
-    new MatchingOutputStream(inputStream, 0);
+    assertThrows(IllegalArgumentException.class, () -> {
+      new MatchingOutputStream(inputStream, 0);
+    });
   }
 }

@@ -14,16 +14,15 @@
 
 package com.android.tools.apk.analyzer.diff.generator.bsdiff;
 
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
+//@RunWith(JUnit4.class)
 public class DivSuffixSorterTest extends SuffixSorterTestBase {
   
   DivSuffixSorter divSuffixSorter;
   
-  @Before
+  @BeforeEach
   public void setup() {
     divSuffixSorter =
         new DivSuffixSorter(new RandomAccessObjectFactory.RandomAccessByteArrayObjectFactory());

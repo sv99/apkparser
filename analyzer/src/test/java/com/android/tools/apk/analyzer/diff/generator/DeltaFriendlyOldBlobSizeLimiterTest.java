@@ -14,24 +14,23 @@
 
 package com.android.tools.apk.analyzer.diff.generator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link DeltaFriendlyOldBlobSizeLimiter}. */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class DeltaFriendlyOldBlobSizeLimiterTest {
   private static final int DEFLATE_COMPRESSION_METHOD = 8;
 
@@ -126,26 +125,22 @@ public class DeltaFriendlyOldBlobSizeLimiterTest {
    */
   private static MinimalZipEntry makeFakeEntry(
       String path, long compressedSize, long uncompressedSize) {
-    try {
-      return new MinimalZipEntry(
-          DEFLATE_COMPRESSION_METHOD, // == deflate
-          0, // crc32OfUncompressedData (ignored for this test)
-          compressedSize,
-          uncompressedSize,
-          path.getBytes("UTF8"),
-          true, // generalPurposeFlagBit11 (true=UTF8)
-          0 // fileOffsetOfLocalEntry (ignored for this test)
-          );
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e); // Impossible on any modern system
-    }
+    return new MinimalZipEntry(
+        DEFLATE_COMPRESSION_METHOD, // == deflate
+        0, // crc32OfUncompressedData (ignored for this test)
+        compressedSize,
+        uncompressedSize,
+        path.getBytes(StandardCharsets.UTF_8),
+        true, // generalPurposeFlagBit11 (true=UTF8)
+        0 // fileOffsetOfLocalEntry (ignored for this test)
+        );
   }
 
   @Test
   public void testNegativeLimit() {
     try {
       new DeltaFriendlyOldBlobSizeLimiter(-1);
-      Assert.fail("Set a negative limit");
+      fail("Set a negative limit");
     } catch (IllegalArgumentException expected) {
       // Pass
     }
@@ -158,9 +153,9 @@ public class DeltaFriendlyOldBlobSizeLimiterTest {
    */
   private static <T> void assertEquivalence(Collection<T> c1, Collection<T> c2) {
     String errorMessage = "Expected " + c1 + " but was " + c2;
-    Assert.assertEquals(errorMessage, c1.size(), c2.size());
-    Assert.assertTrue(errorMessage, c1.containsAll(c2));
-    Assert.assertTrue(errorMessage, c2.containsAll(c1));
+    assertEquals(c1.size(), c2.size(), errorMessage);
+    assertTrue(c1.containsAll(c2), errorMessage);
+    assertTrue(c2.containsAll(c1), errorMessage);
   }
 
   /**
@@ -186,14 +181,14 @@ public class DeltaFriendlyOldBlobSizeLimiterTest {
 
   private File tempFile = null;
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     // Make an empty file to test the recommender's limitation logic
     tempFile = File.createTempFile("DeltaFriendlyOldBlobSizeLimiterTest", "test");
     tempFile.deleteOnExit();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     tempFile.delete();
   }

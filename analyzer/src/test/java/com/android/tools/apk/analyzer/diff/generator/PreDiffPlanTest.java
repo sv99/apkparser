@@ -17,9 +17,9 @@ package com.android.tools.apk.analyzer.diff.generator;
 import com.android.tools.apk.analyzer.diff.shared.JreDeflateParameters;
 import com.android.tools.apk.analyzer.diff.shared.TypedRange;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +29,6 @@ import java.util.List;
 /**
  * Tests for {@link PreDiffPlan}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class PreDiffPlanTest {
   private static final List<TypedRange<Void>> SORTED_VOID_LIST =
       Collections.unmodifiableList(
@@ -53,30 +51,36 @@ public class PreDiffPlanTest {
         Collections.<QualifiedRecommendation>emptyList(), SORTED_VOID_LIST, SORTED_DEFLATE_LIST);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstructor_OldFileUncompressionOrderNotOK() {
-    new PreDiffPlan(
-        Collections.<QualifiedRecommendation>emptyList(),
-        reverse(SORTED_VOID_LIST),
-        SORTED_DEFLATE_LIST,
-        SORTED_DEFLATE_LIST);
+    assertThrows(IllegalArgumentException.class, () ->
+      new PreDiffPlan(
+          Collections.<QualifiedRecommendation>emptyList(),
+          reverse(SORTED_VOID_LIST),
+          SORTED_DEFLATE_LIST,
+          SORTED_DEFLATE_LIST)
+    );
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstructor_NewFileUncompressionOrderNotOK() {
-    new PreDiffPlan(
-        Collections.<QualifiedRecommendation>emptyList(),
-        SORTED_VOID_LIST,
-        reverse(SORTED_DEFLATE_LIST),
-        SORTED_DEFLATE_LIST);
+    assertThrows(IllegalArgumentException.class, () ->
+      new PreDiffPlan(
+          Collections.<QualifiedRecommendation>emptyList(),
+          SORTED_VOID_LIST,
+          reverse(SORTED_DEFLATE_LIST),
+          SORTED_DEFLATE_LIST)
+    );
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstructor_NewFileRecompressionOrderNotOK() {
-    new PreDiffPlan(
+    assertThrows(IllegalArgumentException.class, () ->
+      new PreDiffPlan(
         Collections.<QualifiedRecommendation>emptyList(),
         SORTED_VOID_LIST,
         SORTED_DEFLATE_LIST,
-        reverse(SORTED_DEFLATE_LIST));
+        reverse(SORTED_DEFLATE_LIST))
+    );
   }
 }

@@ -27,16 +27,16 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ArchiveTreeStructureTest {
-    private ILogger logger = new StdLogger(StdLogger.Level.VERBOSE);
+    private final ILogger logger = new StdLogger(StdLogger.Level.VERBOSE);
     private ArchiveContext archiveContext;
     private ArchiveNode root;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         archiveContext =
                 Archives.open(
@@ -44,7 +44,7 @@ public class ArchiveTreeStructureTest {
         root = ArchiveTreeStructure.create(archiveContext);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         archiveContext.close();
     }
@@ -54,11 +54,11 @@ public class ArchiveTreeStructureTest {
         String actual = dumpTree(root, n -> n.getData().getSummaryDisplayString());
         String expected =
                 "/\n"
-                        + "/res/\n"
-                        + "/res/anim/\n"
+                        + "/res\n"
+                        + "/res/anim\n"
                         + "/res/anim/fade.xml\n"
                         + "/instant-run.zip\n"
-                        + "/instant-run.zip/instant-run/\n"
+                        + "/instant-run.zip/instant-run\n"
                         + "/instant-run.zip/instant-run/classes1.dex\n"
                         + "/instant-run-truncated.zip\n"
                         + "/instant-run-truncated.zip/ - Error processing entry: java.io.EOFException\n"
@@ -84,11 +84,11 @@ public class ArchiveTreeStructureTest {
                         });
         String expected =
                 "251        /\n"
-                        + "6          /res/\n"
-                        + "6          /res/anim/\n"
+                        + "6          /res\n"
+                        + "6          /res/anim\n"
                         + "6          /res/anim/fade.xml\n"
                         + "150        /instant-run.zip\n"
-                        + "2          /instant-run.zip/instant-run/\n"
+                        + "2          /instant-run.zip/instant-run\n"
                         + "2          /instant-run.zip/instant-run/classes1.dex\n"
                         + "75         /instant-run-truncated.zip\n"
                         + "0          /instant-run-truncated.zip/ - Error processing entry: java.io.EOFException\n"
@@ -115,11 +115,11 @@ public class ArchiveTreeStructureTest {
                         });
         String expected =
                 "259        /\n"
-                        + "8          /res/\n"
-                        + "8          /res/anim/\n"
+                        + "8          /res\n"
+                        + "8          /res/anim\n"
                         + "8          /res/anim/fade.xml\n"
                         + "153        /instant-run.zip\n"
-                        + "4          /instant-run.zip/instant-run/\n"
+                        + "4          /instant-run.zip/instant-run\n"
                         + "4          /instant-run.zip/instant-run/classes1.dex\n"
                         + "76         /instant-run-truncated.zip\n"
                         + "0          /instant-run-truncated.zip/ - Error processing entry: java.io.EOFException\n"
@@ -151,15 +151,15 @@ public class ArchiveTreeStructureTest {
         String expected =
                 "251        /\n"
                         + "150        /instant-run.zip\n"
-                        + "2          /instant-run.zip/instant-run/\n"
+                        + "2          /instant-run.zip/instant-run\n"
                         + "2          /instant-run.zip/instant-run/classes1.dex\n"
                         + "75         /instant-run-truncated.zip\n"
                         + "0          /instant-run-truncated.zip/ - Error processing entry: java.io.EOFException\n"
                         + "11         /AndroidManifest.xml\n"
                         + "9          /bar.jar\n"
                         + "0          /bar.jar/ - Error processing entry: java.util.zip.ZipError: No valid contents inside\n"
-                        + "6          /res/\n"
-                        + "6          /res/anim/\n"
+                        + "6          /res\n"
+                        + "6          /res/anim\n"
                         + "6          /res/anim/fade.xml";
         assertThat(actual).isEqualTo(expected);
     }

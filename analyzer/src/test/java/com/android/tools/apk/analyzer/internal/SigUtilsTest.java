@@ -15,14 +15,14 @@
  */
 package com.android.tools.apk.analyzer.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SigUtilsTest {
 
-    private ImmutableMap<String, String> testData =
+    private final ImmutableMap<String, String> testData =
             new ImmutableMap.Builder<String, String>()
                     .put("V", "void")
                     .put("Z", "boolean")

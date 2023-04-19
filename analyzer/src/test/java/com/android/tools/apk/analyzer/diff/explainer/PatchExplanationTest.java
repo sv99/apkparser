@@ -17,25 +17,25 @@ package com.android.tools.apk.analyzer.diff.explainer;
 import com.android.tools.apk.analyzer.diff.generator.ByteArrayHolder;
 import com.android.tools.apk.analyzer.diff.generator.RecommendationReason;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 /**
  * Tests for {@link PatchExplanation}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public final class PatchExplanationTest {
 
   // Construct 6 entries:
@@ -88,23 +88,19 @@ public final class PatchExplanationTest {
       boolean isNew,
       RecommendationReason reasonIncludedIfNotNew,
       long compressedSizeInPatch) {
-    try {
-      ByteArrayHolder pathHolder = new ByteArrayHolder(path.getBytes("UTF-8"));
-      return new EntryExplanation(pathHolder, isNew, reasonIncludedIfNotNew, compressedSizeInPatch);
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("System doesn't support UTF-8", e);
-    }
+    ByteArrayHolder pathHolder = new ByteArrayHolder(path.getBytes(StandardCharsets.UTF_8));
+    return new EntryExplanation(pathHolder, isNew, reasonIncludedIfNotNew, compressedSizeInPatch);
   }
 
   @Test
   public void testConstructor_Simple() {
     PatchExplanation patchExplanation = new PatchExplanation(ALL_EXPLANATIONS);
-    Assert.assertEquals(EXPECTED_NEW_EXPLANATIONS, patchExplanation.getExplainedAsNew());
-    Assert.assertEquals(EXPECTED_CHANGED_EXPLANATIONS, patchExplanation.getExplainedAsChanged());
-    Assert.assertEquals(
+    assertEquals(EXPECTED_NEW_EXPLANATIONS, patchExplanation.getExplainedAsNew());
+    assertEquals(EXPECTED_CHANGED_EXPLANATIONS, patchExplanation.getExplainedAsChanged());
+    assertEquals(
         EXPECTED_UNCHANGED_OR_FREE_EXPLANATIONS, patchExplanation.getExplainedAsUnchangedOrFree());
-    Assert.assertEquals(EXPECTED_NEW_SIZE, patchExplanation.getEstimatedNewSize());
-    Assert.assertEquals(EXPECTED_CHANGED_SIZE, patchExplanation.getEstimatedChangedSize());
+    assertEquals(EXPECTED_NEW_SIZE, patchExplanation.getEstimatedNewSize());
+    assertEquals(EXPECTED_CHANGED_SIZE, patchExplanation.getEstimatedChangedSize());
   }
 
   @Test
@@ -113,12 +109,12 @@ public final class PatchExplanationTest {
     Collections.reverse(reversed);
     PatchExplanation patchExplanation = new PatchExplanation(reversed);
     // Order should remaining the same despite reversing the inputs.
-    Assert.assertEquals(EXPECTED_NEW_EXPLANATIONS, patchExplanation.getExplainedAsNew());
-    Assert.assertEquals(EXPECTED_CHANGED_EXPLANATIONS, patchExplanation.getExplainedAsChanged());
-    Assert.assertEquals(
+    assertEquals(EXPECTED_NEW_EXPLANATIONS, patchExplanation.getExplainedAsNew());
+    assertEquals(EXPECTED_CHANGED_EXPLANATIONS, patchExplanation.getExplainedAsChanged());
+    assertEquals(
         EXPECTED_UNCHANGED_OR_FREE_EXPLANATIONS, patchExplanation.getExplainedAsUnchangedOrFree());
-    Assert.assertEquals(EXPECTED_NEW_SIZE, patchExplanation.getEstimatedNewSize());
-    Assert.assertEquals(EXPECTED_CHANGED_SIZE, patchExplanation.getEstimatedChangedSize());
+    assertEquals(EXPECTED_NEW_SIZE, patchExplanation.getEstimatedNewSize());
+    assertEquals(EXPECTED_CHANGED_SIZE, patchExplanation.getEstimatedChangedSize());
   }
 
   @Test
@@ -131,12 +127,12 @@ public final class PatchExplanationTest {
       patchExplanation.writeJson(writer);
       writer.flush();
       String asString = buffer.toString();
-      Assert.assertTrue(asString.startsWith("{"));
-      Assert.assertFalse(asString.isEmpty());
+      assertTrue(asString.startsWith("{"));
+      assertFalse(asString.isEmpty());
       for (EntryExplanation explanation : ALL_EXPLANATIONS) {
-        Assert.assertTrue(asString.contains(new String(explanation.getPath().getData(), "UTF-8")));
+        assertTrue(asString.contains(new String(explanation.getPath().getData(), StandardCharsets.UTF_8)));
       }
-      Assert.assertTrue(asString.endsWith("}"));
+      assertTrue(asString.endsWith("}"));
     }
   }
 }

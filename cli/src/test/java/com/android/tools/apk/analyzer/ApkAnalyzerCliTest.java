@@ -23,21 +23,19 @@ import static org.mockito.Mockito.verify;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Paths;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ApkAnalyzerCli} */
 public class ApkAnalyzerCliTest {
     private ApkAnalyzerCli cli;
-    private ByteArrayOutputStream baos;
-    private ByteArrayOutputStream baosErr;
     private ApkAnalyzerImpl impl;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
-        baosErr = new ByteArrayOutputStream();
+        ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
         PrintStream psErr = new PrintStream(baosErr);
         impl = mock(ApkAnalyzerImpl.class);
         cli =

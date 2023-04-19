@@ -15,7 +15,8 @@
  */
 package com.android.tools.apk.analyzer;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.android.annotations.NonNull;
 import com.android.testutils.TestResources;
@@ -25,10 +26,11 @@ import com.android.tools.apk.analyzer.internal.ApkFileByFileDiffParser;
 import java.io.IOException;
 import java.nio.file.Path;
 import javax.swing.tree.DefaultMutableTreeNode;
-import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ApkFileByFileDiffParserTest {
+
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
     public void testTreeCreation_1v2() throws IOException, InterruptedException {
@@ -38,13 +40,13 @@ public class ApkFileByFileDiffParserTest {
                 ArchiveContext archiveContext2 = Archives.open(apkRoot2)) {
             DefaultMutableTreeNode treeNode =
                     ApkFileByFileDiffParser.createTreeNode(archiveContext1, archiveContext2);
-            TestCase.assertEquals(
+            assertEquals(
                     "1.apk 649 960 158\n"
                             + "  instant-run.zip 0 352 158\n"
-                            + "    instant-run/ 0 2 0\n"
+                            + "    instant-run 0 2 0\n"
                             + "      classes1.dex 0 2 0\n"
-                            + "  res/ 6 6 0\n"
-                            + "    anim/ 6 6 0\n"
+                            + "  res 6 6 0\n"
+                            + "    anim 6 6 0\n"
                             + "      fade.xml 6 6 0\n"
                             + "  AndroidManifest.xml 13 13 0\n",
                     dumpTree(treeNode));
@@ -59,17 +61,24 @@ public class ApkFileByFileDiffParserTest {
                 ArchiveContext archiveContext2 = Archives.open(apkRoot2)) {
             DefaultMutableTreeNode treeNode =
                     ApkFileByFileDiffParser.createTreeNode(archiveContext2, archiveContext1);
-            TestCase.assertEquals(
+            assertEquals(
                     "2.apk 960 649 0\n"
-                            + "  res/ 6 6 0\n"
-                            + "    anim/ 6 6 0\n"
+                            + "  res 6 6 0\n"
+                            + "    anim 6 6 0\n"
                             + "      fade.xml 6 6 0\n"
                             + "  instant-run.zip 352 0 0\n"
-                            + "    instant-run/ 2 0 0\n"
+                            + "    instant-run 2 0 0\n"
                             + "      classes1.dex 2 0 0\n"
                             + "  AndroidManifest.xml 13 13 0\n",
                     dumpTree(treeNode));
         }
+    }
+
+    private static String trimEnd(String s) {
+        if (s.endsWith("/")) {
+            return s.substring(0, s.length() - 1);
+        }
+        return s;
     }
 
     private static String dumpTree(@NonNull DefaultMutableTreeNode treeNode) {
@@ -85,7 +94,10 @@ public class ApkFileByFileDiffParserTest {
         }
         ApkDiffEntry entry = (ApkDiffEntry) ApkEntry.fromNode(treeNode);
         assertNotNull(entry);
-        sb.append(entry.getName());
+        // Java 8, 11: directory node ended with "/"
+        // Java 17: not ended
+        // Unify result for all platform: strip end "/" if exists
+        sb.append(trimEnd(entry.getName()));
         sb.append(' ');
         sb.append(entry.getOldSize());
         sb.append(' ');

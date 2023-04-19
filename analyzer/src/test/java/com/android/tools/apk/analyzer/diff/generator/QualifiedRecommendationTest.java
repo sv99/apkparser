@@ -19,14 +19,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link QualifiedRecommendation}. */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class QualifiedRecommendationTest {
   private static final byte[] FILENAME1 = {'f', 'o', 'o'};
   private static final byte[] FILENAME2 = {'b', 'a', 'r'};
@@ -73,14 +74,14 @@ public class QualifiedRecommendationTest {
   @Test
   @SuppressWarnings("EqualsIncompatibleType") // For ErrorProne
   public void testEquals() {
-    Assert.assertEquals(DEFAULT_QUALIFIED_RECOMMENDATION, DEFAULT_QUALIFIED_RECOMMENDATION);
-    Assert.assertEquals(DEFAULT_QUALIFIED_RECOMMENDATION, CLONED_DEFAULT_QUALIFIED_RECOMMENDATION);
-    Assert.assertNotSame(DEFAULT_QUALIFIED_RECOMMENDATION, CLONED_DEFAULT_QUALIFIED_RECOMMENDATION);
+    assertEquals(DEFAULT_QUALIFIED_RECOMMENDATION, DEFAULT_QUALIFIED_RECOMMENDATION);
+    assertEquals(DEFAULT_QUALIFIED_RECOMMENDATION, CLONED_DEFAULT_QUALIFIED_RECOMMENDATION);
+    assertNotSame(DEFAULT_QUALIFIED_RECOMMENDATION, CLONED_DEFAULT_QUALIFIED_RECOMMENDATION);
     for (QualifiedRecommendation mutation : ALL_MUTATIONS) {
-      Assert.assertNotEquals(DEFAULT_QUALIFIED_RECOMMENDATION, mutation);
+      assertNotEquals(DEFAULT_QUALIFIED_RECOMMENDATION, mutation);
     }
-    Assert.assertFalse(DEFAULT_QUALIFIED_RECOMMENDATION.equals(null));
-    Assert.assertFalse(DEFAULT_QUALIFIED_RECOMMENDATION.equals("foo"));
+    assertFalse(DEFAULT_QUALIFIED_RECOMMENDATION.equals(null));
+    assertFalse(DEFAULT_QUALIFIED_RECOMMENDATION.equals("foo"));
   }
 
   @Test
@@ -88,18 +89,18 @@ public class QualifiedRecommendationTest {
     Set<QualifiedRecommendation> hashSet = new HashSet<>();
     hashSet.add(DEFAULT_QUALIFIED_RECOMMENDATION);
     hashSet.add(CLONED_DEFAULT_QUALIFIED_RECOMMENDATION);
-    Assert.assertEquals(1, hashSet.size());
+    assertEquals(1, hashSet.size());
     hashSet.addAll(ALL_MUTATIONS);
-    Assert.assertEquals(1 + ALL_MUTATIONS.size(), hashSet.size());
+    assertEquals(1 + ALL_MUTATIONS.size(), hashSet.size());
   }
 
   @Test
   public void testGetters() {
-    Assert.assertEquals(ENTRY1, DEFAULT_QUALIFIED_RECOMMENDATION.getOldEntry());
-    Assert.assertEquals(ENTRY2, DEFAULT_QUALIFIED_RECOMMENDATION.getNewEntry());
-    Assert.assertEquals(
+    assertEquals(ENTRY1, DEFAULT_QUALIFIED_RECOMMENDATION.getOldEntry());
+    assertEquals(ENTRY2, DEFAULT_QUALIFIED_RECOMMENDATION.getNewEntry());
+    assertEquals(
         Recommendation.UNCOMPRESS_BOTH, DEFAULT_QUALIFIED_RECOMMENDATION.getRecommendation());
-    Assert.assertEquals(
+    assertEquals(
         RecommendationReason.COMPRESSED_BYTES_CHANGED,
         DEFAULT_QUALIFIED_RECOMMENDATION.getReason());
   }

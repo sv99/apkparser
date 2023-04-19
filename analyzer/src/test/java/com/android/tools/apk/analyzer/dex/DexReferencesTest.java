@@ -15,17 +15,20 @@
  */
 package com.android.tools.apk.analyzer.dex;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.android.annotations.NonNull;
 import com.android.tools.apk.analyzer.dex.tree.DexElementNode;
 import java.io.IOException;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
+import com.android.tools.smali.dexlib2.formatter.DexFormatter;
+import com.android.tools.smali.dexlib2.iface.reference.Reference;
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableTypeReference;
-import com.android.tools.smali.dexlib2.util.ReferenceUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import javax.annotation.Nonnull;
 
 public class DexReferencesTest {
     @Test
@@ -126,12 +129,21 @@ public class DexReferencesTest {
         for (int i = 0; i < depth * 2; i++) {
             sb.append(' ');
         }
-        sb.append(ReferenceUtil.getReferenceString(node.getReference()));
+        sb.append(getReferenceString(node));
         sb.append(": ");
         sb.append('\n');
 
         for (int i = 0; i < node.getChildCount(); i++) {
             dumpTree(sb, node.getChildAt(i), depth + 1);
+        }
+    }
+
+    private static String getReferenceString(@NonNull DexElementNode node) {
+        Reference ref = node.getReference();
+        if (ref != null) {
+            return DexFormatter.INSTANCE.getReference(ref);
+        } else {
+            return null;
         }
     }
 }

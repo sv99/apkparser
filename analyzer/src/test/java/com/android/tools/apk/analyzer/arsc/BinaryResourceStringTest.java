@@ -16,23 +16,23 @@
 
 package com.android.tools.apk.analyzer.arsc;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static com.android.tools.apk.analyzer.arsc.BinaryResourceString.Type.UTF16;
 import static com.android.tools.apk.analyzer.arsc.BinaryResourceString.Type.UTF8;
 
 import com.google.common.base.Strings;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
+//import org.junit.runner.RunWith;
+//import org.junit.runners.JUnit4;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-@RunWith(JUnit4.class)
+//@RunWith(JUnit4.class)
 public class BinaryResourceStringTest {
 
   /**

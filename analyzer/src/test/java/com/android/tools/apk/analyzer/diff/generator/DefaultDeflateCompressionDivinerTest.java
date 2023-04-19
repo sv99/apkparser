@@ -14,6 +14,12 @@
 
 package com.android.tools.apk.analyzer.diff.generator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import com.android.tools.apk.analyzer.diff.generator.DefaultDeflateCompressionDiviner.DivinationResult;
 import com.android.tools.apk.analyzer.diff.shared.ByteArrayInputStreamFactory;
 import com.android.tools.apk.analyzer.diff.shared.DefaultDeflateCompatibilityWindow;
@@ -26,17 +32,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DefaultDeflateCompressionDiviner}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class DefaultDeflateCompressionDivinerTest {
   /**
    * The object under test.
@@ -48,7 +49,7 @@ public class DefaultDeflateCompressionDivinerTest {
    */
   private byte[] testData = null;
 
-  @Before
+  @BeforeEach
   public void setup() {
     testData = new DefaultDeflateCompatibilityWindow().getCorpus();
     diviner = new DefaultDeflateCompressionDiviner();
@@ -73,7 +74,7 @@ public class DefaultDeflateCompressionDivinerTest {
   @Test
   public void testDivineDeflateParameters_JunkData() throws IOException {
     final byte[] junk = new byte[] {0, 1, 2, 3, 4};
-    Assert.assertNull(diviner.divineDeflateParameters(new ByteArrayInputStreamFactory(junk)));
+    assertNull(diviner.divineDeflateParameters(new ByteArrayInputStreamFactory(junk)));
   }
 
   @Test
@@ -85,20 +86,20 @@ public class DefaultDeflateCompressionDivinerTest {
           final byte[] buffer = deflate(trueParameters);
           JreDeflateParameters divinedParameters =
               diviner.divineDeflateParameters(new ByteArrayInputStreamFactory(buffer));
-          Assert.assertNotNull(divinedParameters);
+          assertNotNull(divinedParameters);
           // TODO(andrewhayden) make *CERTAIN 100%( that strategy doesn't matter for level < 4.
           if (strategy == 1 && level <= 3) {
             // Strategy 1 produces identical output at levels 1, 2 and 3.
-            Assert.assertEquals(
+            assertEquals(
                 /*expected=*/ JreDeflateParameters.of(level, 0, nowrap),
                 /*actual=*/ divinedParameters);
           } else if (strategy == 2) {
             // All levels are the same with strategy 2.
             // TODO: Assert only one test gets done for this, should be the first level always.
-            Assert.assertEquals(nowrap, divinedParameters.nowrap);
-            Assert.assertEquals(strategy, divinedParameters.strategy);
+            assertEquals(nowrap, divinedParameters.nowrap);
+            assertEquals(strategy, divinedParameters.strategy);
           } else {
-            Assert.assertEquals(trueParameters, divinedParameters);
+            assertEquals(trueParameters, divinedParameters);
           }
         } // End of iteration on level
       } // End of iteration on strategy
@@ -112,23 +113,23 @@ public class DefaultDeflateCompressionDivinerTest {
     try {
       UnitTestZipArchive.saveTestZip(tempFile);
       List<DivinationResult> results = diviner.divineDeflateParameters(tempFile);
-      Assert.assertEquals(UnitTestZipArchive.allEntriesInFileOrder.size(), results.size());
+      assertEquals(UnitTestZipArchive.allEntriesInFileOrder.size(), results.size());
       for (int x = 0; x < results.size(); x++) {
         UnitTestZipEntry expected = UnitTestZipArchive.allEntriesInFileOrder.get(x);
         DivinationResult actual = results.get(x);
-        Assert.assertEquals(expected.path, actual.minimalZipEntry.getFileName());
+        assertEquals(expected.path, actual.minimalZipEntry.getFileName());
         int expectedLevel = expected.level;
         if (expectedLevel > 0) {
           // Compressed entry
-          Assert.assertTrue(actual.minimalZipEntry.isDeflateCompressed());
-          Assert.assertNotNull(actual.divinedParameters);
-          Assert.assertEquals(expectedLevel, actual.divinedParameters.level);
-          Assert.assertEquals(0, actual.divinedParameters.strategy);
-          Assert.assertTrue(actual.divinedParameters.nowrap);
+          assertTrue(actual.minimalZipEntry.isDeflateCompressed());
+          assertNotNull(actual.divinedParameters);
+          assertEquals(expectedLevel, actual.divinedParameters.level);
+          assertEquals(0, actual.divinedParameters.strategy);
+          assertTrue(actual.divinedParameters.nowrap);
         } else {
           // Uncompressed entry
-          Assert.assertFalse(actual.minimalZipEntry.isDeflateCompressed());
-          Assert.assertNull(actual.divinedParameters);
+          assertFalse(actual.minimalZipEntry.isDeflateCompressed());
+          assertNull(actual.divinedParameters);
         }
       }
     } finally {

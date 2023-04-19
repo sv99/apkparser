@@ -14,6 +14,9 @@
 
 package com.android.tools.apk.analyzer.diff.explainer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.android.tools.apk.analyzer.diff.generator.ByteArrayHolder;
 import com.android.tools.apk.analyzer.diff.generator.DeltaGenerator;
 import com.android.tools.apk.analyzer.diff.generator.MinimalZipArchive;
@@ -32,20 +35,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link PatchExplainer}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class PatchExplainerTest {
 
   // All the A and B entries consist of a chunk of text followed by a standard corpus of text from
@@ -86,8 +85,8 @@ public class PatchExplainerTest {
       while ((numRead = uncompressedIn.read(readBuffer)) >= 0) {
         actualInput.write(readBuffer, 0, numRead);
       }
-      Assert.assertArrayEquals(expectedInput, actualInput.toByteArray());
-      compressedOut.write(OUTPUT.getBytes("US-ASCII"));
+      assertArrayEquals(expectedInput, actualInput.toByteArray());
+      compressedOut.write(OUTPUT.getBytes(StandardCharsets.US_ASCII));
     }
   }
 
@@ -110,7 +109,7 @@ public class PatchExplainerTest {
         throws IOException {
       assertFileEquals(oldBlob, expectedOld);
       assertFileEquals(newBlob, expectedNew);
-      deltaOut.write(OUTPUT.getBytes("US-ASCII"));
+      deltaOut.write(OUTPUT.getBytes(StandardCharsets.US_ASCII));
     }
 
     private final void assertFileEquals(File file, byte[] expected) throws IOException {
@@ -119,7 +118,7 @@ public class PatchExplainerTest {
           DataInputStream dataIn = new DataInputStream(fileIn)) {
         dataIn.readFully(actual);
       }
-      Assert.assertArrayEquals(expected, actual);
+      assertArrayEquals(expected, actual);
     }
   }
 
@@ -133,13 +132,13 @@ public class PatchExplainerTest {
    */
   private File newFile = null;
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     oldFile = File.createTempFile("patchexplainertest", "old");
     newFile = File.createTempFile("patchexplainertest", "new");
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (oldFile != null) {
       try {
@@ -199,7 +198,7 @@ public class PatchExplainerTest {
             ENTRY_A1_LEVEL_6.getUncompressedBinaryContent(),
             ENTRY_A2_LEVEL_9.getUncompressedBinaryContent());
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile);
     // The compressed bytes changed, and so did the uncompressed bytes. The patch size should be
@@ -229,7 +228,7 @@ public class PatchExplainerTest {
             ENTRY_A1_LEVEL_6.getCompressedBinaryContent(),
             ENTRY_A2_LEVEL_9.getCompressedBinaryContent());
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile, limiter);
     // The uncompressed bytes are not the same. The patch plan will want to uncompress the entries,
@@ -271,7 +270,7 @@ public class PatchExplainerTest {
             ENTRY_A1_STORED.getUncompressedBinaryContent(),
             ENTRY_A2_STORED.getUncompressedBinaryContent());
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile);
     // The uncompressed bytes are not the same. Thus the patch size should be non-zero.
@@ -295,7 +294,7 @@ public class PatchExplainerTest {
             ENTRY_A1_LEVEL_9.getUncompressedBinaryContent(),
             ENTRY_A1_STORED.getUncompressedBinaryContent());
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile);
     EntryExplanation expected =
@@ -318,7 +317,7 @@ public class PatchExplainerTest {
             ENTRY_A1_STORED.getUncompressedBinaryContent(),
             ENTRY_A1_LEVEL_6.getUncompressedBinaryContent());
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile);
     EntryExplanation expected =
@@ -352,7 +351,7 @@ public class PatchExplainerTest {
     FakeDeltaGenerator fakeDeltaGenerator =
         new FakeDeltaGenerator(ENTRY_A1_STORED.getUncompressedBinaryContent(), justNewData);
     FakeCompressor fakeCompressor =
-        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes("US-ASCII"));
+        new FakeCompressor(FakeDeltaGenerator.OUTPUT.getBytes(StandardCharsets.US_ASCII));
     PatchExplainer explainer = new PatchExplainer(fakeCompressor, fakeDeltaGenerator);
     List<EntryExplanation> explanations = explainer.explainPatch(oldFile, newFile);
     EntryExplanation expected =
@@ -390,12 +389,12 @@ public class PatchExplainerTest {
    * @param expected the expected explanation
    */
   private void checkExplanation(List<EntryExplanation> explanations, EntryExplanation expected) {
-    Assert.assertEquals(1, explanations.size());
+    assertEquals(1, explanations.size());
     EntryExplanation actual = explanations.get(0);
-    Assert.assertEquals(expected.getPath(), actual.getPath());
-    Assert.assertEquals(expected.isNew(), actual.isNew());
-    Assert.assertEquals(expected.getReasonIncludedIfNotNew(), actual.getReasonIncludedIfNotNew());
-    Assert.assertEquals(expected.getCompressedSizeInPatch(), actual.getCompressedSizeInPatch());
+    assertEquals(expected.getPath(), actual.getPath());
+    assertEquals(expected.isNew(), actual.isNew());
+    assertEquals(expected.getReasonIncludedIfNotNew(), actual.getReasonIncludedIfNotNew());
+    assertEquals(expected.getCompressedSizeInPatch(), actual.getCompressedSizeInPatch());
   }
 
   /**
@@ -406,7 +405,7 @@ public class PatchExplainerTest {
    * @throws UnsupportedEncodingException if the system doesn't support US-ASCII. No, seriously.
    */
   private static ByteArrayHolder path(UnitTestZipEntry entry) throws UnsupportedEncodingException {
-    return new ByteArrayHolder(entry.path.getBytes("US-ASCII"));
+    return new ByteArrayHolder(entry.path.getBytes(StandardCharsets.US_ASCII));
   }
 
   /**

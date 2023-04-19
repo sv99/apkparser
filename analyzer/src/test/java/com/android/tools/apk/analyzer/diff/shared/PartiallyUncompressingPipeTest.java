@@ -16,11 +16,10 @@ package com.android.tools.apk.analyzer.diff.shared;
 
 import com.android.tools.apk.analyzer.diff.shared.PartiallyUncompressingPipe.Mode;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,13 +28,11 @@ import java.io.IOException;
 /**
  * Tests for {@link PartiallyUncompressingPipe}.
  */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class PartiallyUncompressingPipeTest {
   private ByteArrayOutputStream outBuffer;
   private PartiallyUncompressingPipe stream;
 
-  @Before
+  @BeforeEach
   public void setup() {
     outBuffer = new ByteArrayOutputStream();
     stream = new PartiallyUncompressingPipe(outBuffer, 32768);
@@ -45,7 +42,7 @@ public class PartiallyUncompressingPipeTest {
   public void testWriteAll_Uncompressed() throws IOException {
     byte[] expectedBytes = new byte[] {1, 2, 3, 4, 5};
     stream.pipe(new ByteArrayInputStream(expectedBytes), Mode.COPY);
-    Assert.assertArrayEquals(expectedBytes, outBuffer.toByteArray());
+    assertArrayEquals(expectedBytes, outBuffer.toByteArray());
   }
 
   @Test
@@ -53,7 +50,7 @@ public class PartiallyUncompressingPipeTest {
     UnitTestZipEntry entry = UnitTestZipArchive.makeUnitTestZipEntry("/foo", 7, "frobozz", null);
     stream.pipe(
         new ByteArrayInputStream(entry.getCompressedBinaryContent()), Mode.UNCOMPRESS_NOWRAP);
-    Assert.assertArrayEquals(entry.getUncompressedBinaryContent(), outBuffer.toByteArray());
+    assertArrayEquals(entry.getUncompressedBinaryContent(), outBuffer.toByteArray());
   }
 
   @Test
@@ -70,7 +67,7 @@ public class PartiallyUncompressingPipeTest {
 
     // Now use the compressed data as input to the PartiallyUncompressingPipe.
     stream.pipe(new ByteArrayInputStream(compressBuffer.toByteArray()), Mode.UNCOMPRESS_WRAPPED);
-    Assert.assertArrayEquals(entry.getUncompressedBinaryContent(), outBuffer.toByteArray());
+    assertArrayEquals(entry.getUncompressedBinaryContent(), outBuffer.toByteArray());
   }
 
   @Test
@@ -103,6 +100,6 @@ public class PartiallyUncompressingPipeTest {
     stream.pipe(new ByteArrayInputStream(expectedBytes5), Mode.COPY);
     expected.write(expectedBytes5);
 
-    Assert.assertArrayEquals(expected.toByteArray(), outBuffer.toByteArray());
+    assertArrayEquals(expected.toByteArray(), outBuffer.toByteArray());
   }
 }

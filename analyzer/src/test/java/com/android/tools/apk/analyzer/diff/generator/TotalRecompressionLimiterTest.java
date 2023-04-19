@@ -15,20 +15,20 @@
 package com.android.tools.apk.analyzer.diff.generator;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link TotalRecompressionLimiter}. */
-@RunWith(JUnit4.class)
-@SuppressWarnings("javadoc")
 public class TotalRecompressionLimiterTest {
 
   private static final File OLD_FILE = null;
@@ -129,7 +129,7 @@ public class TotalRecompressionLimiterTest {
    * @param originals the original recommendations
    * @return the altered recommendations
    */
-  private static final List<QualifiedRecommendation> suppressed(
+  private static List<QualifiedRecommendation> suppressed(
       QualifiedRecommendation... originals) {
     List<QualifiedRecommendation> result = new ArrayList<>(originals.length);
     for (QualifiedRecommendation original : originals) {
@@ -152,26 +152,22 @@ public class TotalRecompressionLimiterTest {
    * @return the entry
    */
   private static MinimalZipEntry makeFakeEntry(String path, long uncompressedSize) {
-    try {
-      return new MinimalZipEntry(
-          8, // == deflate
-          0, // crc32OfUncompressedData (ignored for this test)
-          0, // compressedSize (ignored for this test)
-          uncompressedSize,
-          path.getBytes("UTF8"),
-          true, // generalPurposeFlagBit11 (true=UTF8)
-          0 // fileOffsetOfLocalEntry (ignored for this test)
-          );
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e); // Impossible on any modern system
-    }
+    return new MinimalZipEntry(
+        8, // == deflate
+        0, // crc32OfUncompressedData (ignored for this test)
+        0, // compressedSize (ignored for this test)
+        uncompressedSize,
+        path.getBytes(StandardCharsets.UTF_8),
+        true, // generalPurposeFlagBit11 (true=UTF8)
+        0 // fileOffsetOfLocalEntry (ignored for this test)
+        );
   }
 
   @Test
   public void testNegativeLimit() {
     try {
       new TotalRecompressionLimiter(-1);
-      Assert.fail("Set a negative limit");
+      fail("Set a negative limit");
     } catch (IllegalArgumentException expected) {
       // Pass
     }
@@ -186,9 +182,9 @@ public class TotalRecompressionLimiterTest {
    * @param c2 the second collection
    */
   private static <T> void assertEquivalence(Collection<T> c1, Collection<T> c2) {
-    Assert.assertEquals(c1.size(), c2.size());
-    Assert.assertTrue(c1.containsAll(c2));
-    Assert.assertTrue(c2.containsAll(c1));
+    assertEquals(c1.size(), c2.size());
+    assertTrue(c1.containsAll(c2));
+    assertTrue(c2.containsAll(c1));
   }
 
   @Test

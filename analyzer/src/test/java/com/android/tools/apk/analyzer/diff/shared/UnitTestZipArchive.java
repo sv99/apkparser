@@ -14,7 +14,10 @@
 
 package com.android.tools.apk.analyzer.diff.shared;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.*;
 import java.util.Arrays;
@@ -197,7 +200,7 @@ public class UnitTestZipArchive {
       checkEntry(zipEntry, zipIn);
       zipIn.closeEntry();
     }
-    Assert.assertNull(zipIn.getNextEntry());
+    assertNull(zipIn.getNextEntry());
     zipIn.close();
   }
 
@@ -229,8 +232,8 @@ public class UnitTestZipArchive {
         if (testEntry.level == 0) {
           // This entry should be uncompressed. So the "compressed" size should be the same as the
           // uncompressed size.
-          Assert.assertEquals(0, entry.getMethod());
-          Assert.assertEquals(
+          assertEquals(0, entry.getMethod());
+          assertEquals(
               testEntry.getUncompressedBinaryContent().length, entry.getCompressedSize());
         }
         ByteArrayOutputStream uncompressedData = new ByteArrayOutputStream();
@@ -239,11 +242,11 @@ public class UnitTestZipArchive {
         while ((numRead = zipIn.read(buffer)) >= 0) {
           uncompressedData.write(buffer, 0, numRead);
         }
-        Assert.assertArrayEquals(
+        assertArrayEquals(
             testEntry.getUncompressedBinaryContent(), uncompressedData.toByteArray());
         return;
       }
     }
-    Assert.fail("entry unknown: " + entry.getName());
+    fail("entry unknown: " + entry.getName());
   }
 }
