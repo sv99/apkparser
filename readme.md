@@ -3,44 +3,54 @@ apkparser
 
 Extracted from android-studio source code.
 
-sdk compatibility
------------------
+update stages
+-------------
 
-Now supported only Java 1.8.
+**1. integrate external diff library**
 
-Problems with realisation `DefaultMutableTreeNode` through  `protected Vector<TreeNode> children;`
-Errors when try cast from `children` to `List<ArchiveNode>`.
+[com.google:archivepatcher](https://github.com/google/archive-patcher) - not available
+in the **jcenter** repositorylibrary. In the google build used from local precompiled repository.
 
-В `IntlliJ Community` похожая проблема решена при помощи [amaembo/streamex](https://github.com/amaembo/streamex)
+from local repository. Used for calculate diff.
 
-```java
-// platform/dvcs-impl/src/com/intellij/dvcs/push/ui/PushLog.java
-import one.util.streamex.StreamEx;
+**2. add StreamEx**
 
-...
+Add [StreamEx](https://github.com/amaembo/streamex) for compatible with never java version
+using `DefaultMutableTreeNode`.
+An example of usage looked at the source of the [intellij-community](https://github.com/JetBrains/intellij-community) 
 
-  private static List<CommitNode> collectSelectedCommitNodes(
-        @NotNull List<DefaultMutableTreeNode> selectedNodes) {
-        //addAll Commit nodes from selected Repository nodes;
-    List<CommitNode> nodes = StreamEx.of(selectedNodes)
-      .select(RepositoryNode.class)
-      .toFlatList(node -> getChildNodesByType(node, CommitNode.class, true));
-    // add all others selected Commit nodes;
-    nodes.addAll(StreamEx.of(selectedNodes)
-                   .select(CommitNode.class)
-                   .filter(node -> !nodes.contains(node))
-                   .toList());
-    return nodes;
-  }        
-```
+**3. update smali version**
 
-Решение проблемы: `StreamEx.select().toList()`
+Move to [google/smali](https://github.com/google/smali) version 3.0.2
 
-Нужно проверить.
+**4. move to JUnit5**
+
+Update all tests to JUnit5
+
+to do
+-----
+
+**5. built-in aapt2 utility**
+
+Get aapt2 from maven. Realization from [bundletool](https://github.com/google/bundletool)
+
+**6. replace compare unit**
+
+Replace external compare unit based on the archivepatcher.
+Now archivepatcher load both source unit and calculate diff patch. 
+This patch used in the main program for display difference.
+
+**7. compare dex units**
+
+Compare dex units - naming and methods body.
+
+**8. compare dex show methods diff**
+
+Show methods diff.
 
 dependencies
 ------------
 
-**smali/backsmali:2.2.4** newer version have changed interface, need update code
+**googl/smali:3.02** google version, forked from original version 2.5.2
 
 **com.google:archivepatcher** library from local repository. Used for calculate diff.
