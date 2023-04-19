@@ -32,6 +32,7 @@ public class FilteredTreeModel<T> extends DefaultTreeModel {
     @Override
     public Object getChild(Object parent, int index) {
         for (int i = 0, n = super.getChildCount(parent); i < n; i++) {
+            @SuppressWarnings("unchecked")
             T result = (T) super.getChild(parent, i);
             if (predicate.test(result)) {
                 if (index == 0) {
