@@ -76,7 +76,7 @@ public class DefaultDeflateCompatibilityWindow {
    * Generates the baseline and returns it.
    * @return see {@link #getBaselineValues()}
    */
-  private static final Map<JreDeflateParameters, String> generateBaseline() {
+  private static Map<JreDeflateParameters, String> generateBaseline() {
     Map<JreDeflateParameters, String> baseline = new HashMap<JreDeflateParameters, String>();
     baseline.put(
         JreDeflateParameters.of(1, 0, true),

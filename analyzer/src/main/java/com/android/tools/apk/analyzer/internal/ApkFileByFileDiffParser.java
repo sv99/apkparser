@@ -43,6 +43,7 @@ import com.android.tools.apk.analyzer.diff.shared.DeflateCompressor;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,7 +67,7 @@ public class ApkFileByFileDiffParser {
                         oldFile.getArchive().getPath().toFile(),
                         newFile.getArchive().getPath().toFile());
         for (EntryExplanation explanation : explanationList) {
-            String path = new String(explanation.getPath().getData(), "UTF8");
+            String path = new String(explanation.getPath().getData(), StandardCharsets.UTF_8);
             pathsToDiffSize.put(path, explanation.getCompressedSizeInPatch());
         }
         return createTreeNode(oldRoot, newRoot, pathsToDiffSize);

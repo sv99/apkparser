@@ -1,7 +1,11 @@
-apkparser
-=========
+apkparser - apkanalyzer
+=======================
 
 Extracted from android-studio source code.
+
+apkparser - project and library.
+
+apkanalizer - command line utility.
 
 update stages
 -------------
@@ -47,6 +51,16 @@ Compare dex units - naming and methods body.
 **8. compare dex show methods diff**
 
 Show methods diff.
+
+diff
+----
+
+Calculate two different diffs.
+
+DiffPatcher simple calculate archive element sizes and show total.
+
+FileByFilePatcher used [bsdiff](https://github.com/mendsley/bsdiff) startegy, for calculation binary diff.
+bsdiff produces smaller binary patches.
 
 dependencies
 ------------

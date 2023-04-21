@@ -190,7 +190,7 @@ public class ApkAnalyzerCli {
         if (subject == null) {
             String subjects =
                     Arrays.stream(Action.values())
-                            .map(action -> action.getSubject())
+                            .map(Action::getSubject)
                             .distinct()
                             .collect(Collectors.joining(", "));
             err.println("Subject must be one of: " + subjects);
@@ -205,7 +205,7 @@ public class ApkAnalyzerCli {
             List<Action> actions = Action.findActions(subject, null);
             String verbs =
                     actions.stream()
-                            .map(action -> action.getVerb())
+                            .map(Action::getVerb)
                             .collect(Collectors.joining(", "));
             err.println("Verb must be one of: " + verbs);
             err.println();

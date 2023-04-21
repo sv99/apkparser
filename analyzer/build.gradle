@@ -17,8 +17,6 @@
 dependencies {
   implementation libs.smali
   implementation libs.baksmali
-  implementation libs.common
-  implementation libs.sdklib
   implementation libs.sdk_common
   implementation libs.streamex
 }

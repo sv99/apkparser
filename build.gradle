@@ -1,15 +1,24 @@
 buildscript {
     ext {
         libs = [
+            annotations    : "com.android.tools:annotations:27.1.1",
             baksmali       : 'com.android.tools.smali:smali-baksmali:3.0.2',
             smali          : 'com.android.tools.smali:smali:3.0.2',
-            jopt           : 'net.sf.jopt-simple:jopt-simple:4.9',
-            common         : 'com.android.tools:common:27.1.1',
+            // last version for replace in the dependencies
+            // without this lib - different sort order in the some tests
+            guava          : 'com.google.guava:guava:31.1-jre',
+            jopt           : 'net.sf.jopt-simple:jopt-simple:5.0.4',
             sdk_common     : 'com.android.tools:sdk-common:27.1.1',
-            sdklib         : 'com.android.tools:sdklib:27.1.1',
-            mockito_core   : 'org.mockito:mockito-core:3.0.0',
-            streamex       : 'one.util:streamex:0.8.1'
+            // transitive dependencies from sdk-common
+            // common         : 'com.android.tools:common:27.1.1',
+            // sdklib         : 'com.android.tools:sdklib:27.1.1',
+            streamex       : 'one.util:streamex:0.8.1',
+
+            testutils      : "com.android.tools:testutils:27.1.1",
+            mockito_core   : 'org.mockito:mockito-core:4.11.0', // last supported Java 8
         ]
+
+        junit_version = "5.9.2"
     }
 }
 
@@ -17,6 +26,7 @@ plugins {
     id "java"
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id "com.github.hierynomus.license" version "0.16.1"
+    id "com.github.ben-manes.versions" version "0.46.0"
 }
 
 repositories {
@@ -36,15 +46,16 @@ allprojects {
     }
 
     dependencies {
-        implementation("com.google.guava:guava:31.1-jre")
-        implementation("com.android.tools:annotations:27.1.1")
+        implementation(libs.guava)
+        implementation(libs.annotations)
 
-        testImplementation("junit:junit:4.13.2")
-        testImplementation("com.android.tools:testutils:27.1.1")
-        testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-        testImplementation(platform("org.junit:junit-bom:5.9.2"))
-        testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.9.2")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+        testImplementation(libs.testutils)
+        testImplementation("org.junit.jupiter:junit-jupiter:$junit_version")
+        testImplementation(platform("org.junit:junit-bom:$junit_version"))
+        // removed JUnit4 dependencies
+        // testImplementation("junit:junit:4.13.2")
+        // testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$junit_version")
+        // testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_version")
     }
 
     test {

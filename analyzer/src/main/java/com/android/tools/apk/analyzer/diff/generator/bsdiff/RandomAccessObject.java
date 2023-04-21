@@ -381,7 +381,7 @@ public interface RandomAccessObject extends DataInput, DataOutput, Closeable {
      */
     // TODO(hartmanng): rethink the handling of these temp files. It's confusing and shouldn't
     // really be the responsibility of RandomAccessObject.
-    @SuppressWarnings("resource") // RandomAccessFile deliberately left open
+    // RandomAccessFile deliberately left open
     public RandomAccessMmapObject(final String tempFileName, final String mode, long length)
         throws IOException, IllegalArgumentException {
       if (length > Integer.MAX_VALUE) {
@@ -424,14 +424,14 @@ public interface RandomAccessObject extends DataInput, DataOutput, Closeable {
      * deleted on close() OR IF THE CONSTRUCTOR FAILS. The main purpose of this constructor is to
      * test close() on the passed-in file.
      *
-     * @param tempFile the the file backing this object
+     * @param tempFile the file backing this object
      * @param mode the mode to use, e.g. "r" or "w" for read or write
      * @throws IOException if unable to open the file for the specified mode
      * @throws IllegalArgumentException if the size of the file is too great
      */
     // TODO(hartmanng): rethink the handling of these temp files. It's confusing and shouldn't
     // really be the responsibility of RandomAccessObject.
-    @SuppressWarnings("resource") // RandomAccessFile deliberately left open
+    // RandomAccessFile deliberately left open
     public RandomAccessMmapObject(final File tempFile, final String mode)
         throws IOException, IllegalArgumentException {
       if (tempFile.length() > Integer.MAX_VALUE) {
