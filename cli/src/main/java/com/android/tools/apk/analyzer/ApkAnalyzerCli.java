@@ -130,7 +130,7 @@ public class ApkAnalyzerCli {
         verbParser.posixlyCorrect(true);
         verbParser.allowsUnrecognizedOptions();
         OptionSpecBuilder humanReadableSpec =
-                verbParser.accepts(FLAG_HUMAN_READABLE, "Print sizes in human readable format");
+                verbParser.acceptsAll(Arrays.asList("h", FLAG_HUMAN_READABLE), "Print sizes in human readable format");
         NonOptionArgumentSpec<String> verbSpec = verbParser.nonOptions().ofType(String.class);
         verbParser.formatHelpWith(new HelpFormatter());
 
@@ -343,8 +343,8 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     notRequiredSpec =
-                            parser.accepts(
-                                    FLAG_NOT_REQUIRED, "Include features marked as not required");
+                            parser.acceptsAll(
+                                    Arrays.asList("n", FLAG_NOT_REQUIRED), "Include features marked as not required");
                 }
                 return parser;
             }
@@ -373,15 +373,15 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     patchSpec =
-                            parser.accepts(
-                                    FLAG_PATCH_SIZE,
+                            parser.acceptsAll(
+                                    Arrays.asList("p", FLAG_PATCH_SIZE),
                                     "Show an estimate of the file-by-file patch instead of raw difference.");
                     filesOnlySpec =
-                            parser.accepts(
-                                    FLAG_FILES_ONLY, "Don't print directory entries in output.");
+                            parser.acceptsAll(
+                                    Arrays.asList("f", FLAG_FILES_ONLY), "Don't print directory entries in output.");
                     diffOnlySpec =
-                            parser.accepts(
-                                    FLAG_DIFF_ONLY,
+                            parser.acceptsAll(
+                                    Arrays.asList("d", FLAG_DIFF_ONLY),
                                     "Only print directories/files with differences.");
                 }
                 return parser;
@@ -419,13 +419,13 @@ public class ApkAnalyzerCli {
             public OptionParser getParser() {
                 if (parser == null) {
                     parser = super.getParser();
-                    rawSizeSpec = parser.accepts(FLAG_RAW_SIZE, "Show raw sizes of files.");
+                    rawSizeSpec = parser.acceptsAll(Arrays.asList("r", FLAG_RAW_SIZE), "Show raw sizes of files.");
                     downloadSizeSpec =
-                            parser.accepts(
-                                    FLAG_DOWNLOAD_SIZE, "Show estimated download sizes of files.");
+                            parser.acceptsAll(
+                                    Arrays.asList("d", FLAG_DOWNLOAD_SIZE), "Show estimated download sizes of files.");
                     filesOnlySpec =
-                            parser.accepts(
-                                    FLAG_FILES_ONLY, "Don't include directory entries in output.");
+                            parser.acceptsAll(
+                                    Arrays.asList("f", FLAG_FILES_ONLY), "Don't include directory entries in output.");
                 }
                 return parser;
             }
@@ -455,7 +455,7 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     filePathSpec =
-                            parser.accepts(FLAG_FILE_PATH, "File path within the APK.")
+                            parser.acceptsAll(Arrays.asList("f", FLAG_FILE_PATH), "File path within the APK.")
                                     .withRequiredArg()
                                     .ofType(String.class);
                 }
@@ -597,9 +597,9 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     filesSpec =
-                            parser.accepts(
-                                            FLAG_FILES,
-                                            "Dex file names to include. Default: all dex files.")
+                            parser.acceptsAll(
+                                    Arrays.asList("f", FLAG_FILES),
+                                    "Dex file names to include. Default: all dex files.")
                                     .withRequiredArg()
                                     .ofType(String.class);
                 }
@@ -639,6 +639,16 @@ public class ApkAnalyzerCli {
             public OptionParser getParser() {
                 if (parser == null) {
                     parser = super.getParser();
+                    definedOnlySpec =
+                            parser.acceptsAll(
+                                    Arrays.asList("d", FLAG_SHOW_DEFINED_ONLY),
+                                    "Only include classes defined in the APK in the output.");
+                    filesSpec =
+                            parser.acceptsAll(
+                                            Arrays.asList("f", FLAG_FILES),
+                                            "Dex file names to include. Default: all dex files.")
+                                    .withRequiredArg()
+                                    .ofType(String.class);
                     pgFolderSpec =
                             parser.accepts(
                                             FLAG_PROGUARD_FOLDER,
@@ -657,20 +667,10 @@ public class ApkAnalyzerCli {
                             parser.accepts(FLAG_PROGUARD_USAGES, "The Proguard usages file.")
                                     .withRequiredArg()
                                     .ofType(File.class);
-                    definedOnlySpec =
-                            parser.accepts(
-                                    FLAG_SHOW_DEFINED_ONLY,
-                                    "Only include classes defined in the APK in the output.");
                     showRemovedSpec =
                             parser.accepts(
                                     FLAG_SHOW_REMOVED,
                                     "Show classes and members that were removed by Proguard.");
-                    filesSpec =
-                            parser.accepts(
-                                            FLAG_FILES,
-                                            "Dex file names to include. Default: all dex files.")
-                                    .withRequiredArg()
-                                    .ofType(String.class);
                 }
                 return parser;
             }
@@ -710,13 +710,13 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     classSpec =
-                            parser.accepts(FLAG_CLASS, "Fully qualified class name to decompile.")
+                            parser.acceptsAll(Arrays.asList("c", FLAG_CLASS), "Fully qualified class name to decompile.")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     methodSpec =
-                            parser.accepts(
-                                            FLAG_METHOD,
+                            parser.acceptsAll(
+                                            Arrays.asList("m", FLAG_METHOD),
                                             "Method to decompile. Format: name(params)returnType, e.g. someMethod(Ljava/lang/String;I)V")
                                     .withRequiredArg()
                                     .ofType(String.class);
@@ -777,12 +777,12 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     typeSpec =
-                            parser.accepts(FLAG_TYPE, "The resource type, e.g. string")
+                            parser.acceptsAll(Arrays.asList("t", FLAG_TYPE), "The resource type, e.g. string")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     packageSpec =
-                            parser.accepts(FLAG_PACKAGE, "The resource table package name")
+                            parser.acceptsAll(Arrays.asList("p", FLAG_PACKAGE), "The resource table package name")
                                     .withRequiredArg()
                                     .ofType(String.class);
                 }
@@ -817,22 +817,22 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     typeSpec =
-                            parser.accepts(FLAG_TYPE, "The resource type, e.g. string")
+                            parser.acceptsAll(Arrays.asList("t", FLAG_TYPE), "The resource type, e.g. string")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     configSpec =
-                            parser.accepts(FLAG_CONFIG, "The resource configuration")
+                            parser.acceptsAll(Arrays.asList("c", FLAG_CONFIG), "The resource configuration")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     nameSpec =
-                            parser.accepts(FLAG_NAME, "The resource name")
+                            parser.acceptsAll(Arrays.asList("n", FLAG_NAME), "The resource name")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     packageSpec =
-                            parser.accepts(FLAG_PACKAGE, "The resource table package name")
+                            parser.acceptsAll(Arrays.asList("p", FLAG_PACKAGE), "The resource table package name")
                                     .withRequiredArg()
                                     .ofType(String.class);
                 }
@@ -868,17 +868,17 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     typeSpec =
-                            parser.accepts(FLAG_TYPE, "The resource type, e.g. string")
+                            parser.acceptsAll(Arrays.asList("t", FLAG_TYPE), "The resource type, e.g. string")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     configSpec =
-                            parser.accepts(FLAG_CONFIG, "The resource configuration")
+                            parser.acceptsAll(Arrays.asList("c", FLAG_CONFIG), "The resource configuration")
                                     .withRequiredArg()
                                     .ofType(String.class)
                                     .required();
                     packageSpec =
-                            parser.accepts(FLAG_PACKAGE, "The resource table package name")
+                            parser.acceptsAll(Arrays.asList("p", FLAG_PACKAGE), "The resource table package name")
                                     .withRequiredArg()
                                     .ofType(String.class);
                 }
@@ -914,7 +914,7 @@ public class ApkAnalyzerCli {
                 if (parser == null) {
                     parser = super.getParser();
                     filePathSpec = parser
-                            .accepts(FLAG_FILE_PATH, "File path within the APK.")
+                            .acceptsAll(Arrays.asList("f", FLAG_FILE_PATH), "File path within the APK.")
                             .withRequiredArg()
                             .ofType(String.class);
                 }

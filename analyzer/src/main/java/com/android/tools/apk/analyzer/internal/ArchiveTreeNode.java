@@ -38,7 +38,10 @@ public class ArchiveTreeNode extends DefaultMutableTreeNode implements ArchiveNo
     @NonNull
     @Override
     public List<ArchiveNode> getChildren() {
-        return children == null ? ImmutableList.of() : StreamEx.of(children)
+        // Java 8 children has type Vector, never version has type Vector<DefaultMutableTreeNode>
+        //noinspection unchecked
+        Vector<DefaultMutableTreeNode> gen_children = children;
+        return children == null ? ImmutableList.of() : StreamEx.of(gen_children)
                 .select(ArchiveNode.class)
                 .toImmutableList();
     }

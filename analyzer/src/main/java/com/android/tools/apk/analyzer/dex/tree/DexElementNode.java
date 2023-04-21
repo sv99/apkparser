@@ -72,7 +72,10 @@ public abstract class DexElementNode extends DefaultMutableTreeNode {
         }
         if (children != null) {
             // Collections.sort(children, comparator);
-            List<DexElementNode> elementNodes = StreamEx.of(children)
+            // Java 8 children has type Vector, never version has type Vector<DefaultMutableTreeNode>
+            //noinspection unchecked
+            Vector<DefaultMutableTreeNode> gen_children = children;
+            List<DexElementNode> elementNodes = StreamEx.of(gen_children)
                     .select(DexElementNode.class).toMutableList();
             elementNodes.sort(comparator);
             children = new Vector<>(elementNodes);
