@@ -622,7 +622,7 @@ public class ApkAnalyzerCli {
                 SUBJECT_DEX,
                 ACTION_PACKAGES,
                 "Prints the class tree from DEX.\n"
-                        + "P,C,M,F: indicates packages, classes methods, fields\n"
+                        + "P,C,M,F: indicates packages, classes, methods, fields\n"
                         + "x,k,r,d: indicates removed, kept, referenced and defined nodes") {
 
             public ArgumentAcceptingOptionSpec<String> filesSpec;
@@ -802,6 +802,48 @@ public class ApkAnalyzerCli {
                         opts.valueOf(getFileSpec()).toPath(),
                         opts.valueOf(typeSpec),
                         opts.valueOf(packageSpec));
+            }
+        },
+        DEX_COMPARE(
+                SUBJECT_DEX,
+                ACTION_COMPARE,
+                "Compare dex files.\n") {
+
+            public ArgumentAcceptingOptionSpec<String> filesSpec;
+            @Nullable OptionParser parser;
+
+            @NonNull
+            @Override
+            public OptionParser getParser() {
+                if (parser == null) {
+                    parser = super.getParser();
+                    filesSpec =
+                            parser.acceptsAll(
+                                            Arrays.asList("f", FLAG_FILES),
+                                            "Dex file names to compare. Default: all dex files.")
+                                    .withRequiredArg()
+                                    .ofType(String.class);
+                }
+                return parser;
+            }
+
+            @Override
+            public void execute(
+                    PrintStream out,
+                    PrintStream err,
+                    @NonNull ApkAnalyzerImpl impl,
+                    @NonNull String... args) {
+                OptionParser parser = getParser();
+                OptionSet opts = parseOrPrintHelp(parser, err, args);
+                List<File> files = opts.valuesOf(getFileSpec());
+                if (files.size() < 2) {
+                    throw new RuntimeException(
+                            "This method requires two APK paths - old_apk new_apk");
+                }
+                impl.dexCompare(
+                        files.get(0).toPath(),
+                        files.get(1).toPath(),
+                        opts.valuesOf(filesSpec));
             }
         },
         RESOURCES_VALUE(SUBJECT_RESOURCES, ACTION_VALUE, "Prints the given resource's value") {

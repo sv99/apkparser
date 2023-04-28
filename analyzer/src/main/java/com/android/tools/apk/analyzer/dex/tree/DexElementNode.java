@@ -19,12 +19,11 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.tools.proguard.ProguardMap;
 import com.android.tools.proguard.ProguardSeedsMap;
-import java.util.Collections;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import com.android.tools.smali.dexlib2.iface.reference.Reference;
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableReference;
@@ -163,4 +162,12 @@ public abstract class DexElementNode extends DefaultMutableTreeNode {
      * @return private size of node in bytes
      */
     public abstract long getSize();
+
+    /**
+     * Returns the Node type short name
+     * Example C - for Class Node.
+     *
+     * @return short type name of the node
+     */
+     public abstract String getNodeTypeShort();
 }

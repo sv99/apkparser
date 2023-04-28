@@ -39,6 +39,11 @@ public class DexPackageNode extends DexElementNode {
         return size;
     }
 
+    @Override
+    public String getNodeTypeShort() {
+        return "P";
+    }
+
     @NonNull
     public DexClassNode getOrCreateClass(
             @NonNull String parentPackage,

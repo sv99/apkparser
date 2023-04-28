@@ -30,6 +30,11 @@ public class DexFieldNode extends DexElementNode {
         super(displayName, false, reference);
     }
 
+    @Override
+    public String getNodeTypeShort() {
+        return "F";
+    }
+
     @Nullable
     @Override
     public FieldReference getReference() {

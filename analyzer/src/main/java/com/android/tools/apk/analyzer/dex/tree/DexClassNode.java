@@ -58,6 +58,11 @@ public class DexClassNode extends DexElementNode {
         return size;
     }
 
+    @Override
+    public String getNodeTypeShort() {
+        return "C";
+    }
+
     public void setSize(long size) {
         this.size = size;
     }

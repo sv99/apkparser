@@ -29,12 +29,9 @@ import com.android.tools.apk.analyzer.arsc.ResourceTableChunk;
 import com.android.tools.apk.analyzer.arsc.StringPoolChunk;
 import com.android.tools.apk.analyzer.arsc.TypeChunk;
 import com.android.tools.apk.analyzer.arsc.TypeSpecChunk;
-import com.android.tools.apk.analyzer.dex.DexDisassembler;
-import com.android.tools.apk.analyzer.dex.DexFileStats;
-import com.android.tools.apk.analyzer.dex.DexFiles;
-import com.android.tools.apk.analyzer.dex.DexViewFilters;
-import com.android.tools.apk.analyzer.dex.PackageTreeCreator;
-import com.android.tools.apk.analyzer.dex.ProguardMappings;
+import com.android.tools.apk.analyzer.dex.*;
+import com.android.tools.apk.analyzer.dex.diff.DexDiffEntry;
+import com.android.tools.apk.analyzer.dex.diff.DexDiffParser;
 import com.android.tools.apk.analyzer.dex.tree.DexClassNode;
 import com.android.tools.apk.analyzer.dex.tree.DexElementNode;
 import com.android.tools.apk.analyzer.dex.tree.DexFieldNode;
@@ -53,6 +50,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -75,6 +73,7 @@ import java.util.stream.Stream;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 /**
@@ -82,11 +81,15 @@ import org.xml.sax.SAXException;
  * and files list - dex code - resources
  */
 public class ApkAnalyzerImpl {
-    @NonNull private final PrintStream out;
-    @NonNull private final AaptInvoker aaptInvoker;
+    @NonNull
+    private final PrintStream out;
+    @NonNull
+    private final AaptInvoker aaptInvoker;
     private boolean humanReadableFlag;
 
-    /** Constructs a new command-line processor. */
+    /**
+     * Constructs a new command-line processor.
+     */
     public ApkAnalyzerImpl(@NonNull PrintStream out, @NonNull AaptInvoker aaptInvoker) {
         this.out = out;
         this.aaptInvoker = aaptInvoker;
@@ -402,6 +405,84 @@ public class ApkAnalyzerImpl {
         }
     }
 
+    public void dexCompare(
+            @NonNull Path oldApkFile,
+            @NonNull Path newApkFile,
+            @Nullable List<String> dexFilePaths) {
+        try (ArchiveContext archiveContext1 = Archives.open(oldApkFile);
+             ArchiveContext archiveContext2 = Archives.open(newApkFile)) {
+            ProguardMappings proguardMappings =
+                    getProguardMappings(null, null, null, null);
+            // prepare dex files
+            Collection<Path> dexPaths1;
+            if (dexFilePaths == null || dexFilePaths.isEmpty()) {
+                dexPaths1 = getDexFilesFrom(archiveContext1.getArchive().getContentRoot());
+            } else {
+                dexPaths1 =
+                    dexFilePaths
+                        .stream()
+                        .map(
+                            dexFile ->
+                                archiveContext1
+                                    .getArchive()
+                                    .getContentRoot()
+                                    .resolve(dexFile))
+                        .collect(Collectors.toList());
+            }
+            Map<String, DexBackedDexFile> dexFiles1 = Maps.newHashMapWithExpectedSize(dexPaths1.size());
+            for (Path dexPath : dexPaths1) {
+                dexFiles1.put(dexPath.toString(), DexFiles.getDexFile(dexPath));
+            }
+            Collection<Path> dexPaths2;
+            if (dexFilePaths == null || dexFilePaths.isEmpty()) {
+                dexPaths2 = getDexFilesFrom(archiveContext2.getArchive().getContentRoot());
+            } else {
+                dexPaths2 =
+                    dexFilePaths
+                        .stream()
+                        .map(
+                            dexFile ->
+                                archiveContext2
+                                    .getArchive()
+                                    .getContentRoot()
+                                    .resolve(dexFile))
+                        .collect(Collectors.toList());
+            }
+            Map<String, DexBackedDexFile> dexFiles2 = Maps.newHashMapWithExpectedSize(dexPaths2.size());
+            for (Path dexPath : dexPaths2) {
+                dexFiles2.put(dexPath.toString(), DexFiles.getDexFile(dexPath));
+            }
+            // compare dex files one by one
+            for (String path : dexFiles2.keySet()) {
+                out.printf("%s", path).println();
+                DexBackedDexFile newDex = dexFiles2.get(path);
+                if (!dexFiles1.containsKey(path)) {
+                    System.err.println(
+                            "Old apk don't contain dex file: " + path);
+                }
+                DexBackedDexFile oldDex = dexFiles1.get(path);
+
+                DexDiffParser parser = new DexDiffParser(oldDex, newDex);
+                ArrayList<DexDiffEntry> diffs = parser.parse();
+                dumpDexCompare(diffs);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void dumpDexCompare(ArrayList<DexDiffEntry> diffs) {
+        int i = 0;
+        for (DexDiffEntry diff: diffs) {
+            out.printf(
+                            "%s\t%s\t%s",
+                            getSize(diff.getOldSize()),
+                            getSize(diff.getNewSize()),
+                            diff.getName())
+                    .println();
+        }
+    }
+
     @NonNull
     private static ProguardMappings getProguardMappings(
             @Nullable Path proguardFolderPath,
@@ -411,7 +492,7 @@ public class ApkAnalyzerImpl {
         ProguardMappingFiles pfm;
         if (proguardFolderPath != null) {
             try {
-                pfm = ProguardMappingFiles.from(new Path[] {proguardFolderPath});
+                pfm = ProguardMappingFiles.from(new Path[]{proguardFolderPath});
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -468,14 +549,14 @@ public class ApkAnalyzerImpl {
         } else if (errors.isEmpty() && !loaded.isEmpty()) {
             System.err.println(
                     "Successfully loaded maps from: "
-                            + loaded.stream().collect(Collectors.joining(", ")));
+                            + String.join(", ", loaded));
         } else if (!errors.isEmpty() && !loaded.isEmpty()) {
             System.err.println(
                     "Successfully loaded maps from: "
-                            + loaded.stream().collect(Collectors.joining(", "))
+                            + String.join(", ", loaded)
                             + "\n"
                             + "There were problems loading: "
-                            + errors.stream().collect(Collectors.joining(", ")));
+                            + String.join(", ", errors));
         }
 
         return new ProguardMappings(proguardMap, seeds, usage);
@@ -488,15 +569,7 @@ public class ApkAnalyzerImpl {
             ProguardMap map) {
         StringBuilder sb = new StringBuilder();
 
-        if (node instanceof DexClassNode) {
-            sb.append("C ");
-        } else if (node instanceof DexPackageNode) {
-            sb.append("P ");
-        } else if (node instanceof DexMethodNode) {
-            sb.append("M ");
-        } else if (node instanceof DexFieldNode) {
-            sb.append("F ");
-        }
+        sb.append(node.getNodeTypeShort()).append(" ");
 
         if (node.isRemoved()) {
             sb.append("x ");
@@ -710,7 +783,7 @@ public class ApkAnalyzerImpl {
             boolean showFilesOnly,
             boolean showDifferentOnly) {
         try (ArchiveContext archiveContext1 = Archives.open(oldApkFile);
-                ArchiveContext archiveContext2 = Archives.open(newApkFile)) {
+             ArchiveContext archiveContext2 = Archives.open(newApkFile)) {
             DefaultMutableTreeNode node;
             if (patchSize) {
                 node = ApkFileByFileDiffParser.createTreeNode(archiveContext1, archiveContext2);
@@ -883,11 +956,11 @@ public class ApkAnalyzerImpl {
     private static List<Path> getDexFilesFrom(Path dir) {
         try (Stream<Path> stream = Files.list(dir)) {
             return stream.filter(
-                    path ->
-                            Files.isRegularFile(path)
-                                    && path.getFileName()
-                                    .toString()
-                                    .endsWith(".dex"))
+                            path ->
+                                    Files.isRegularFile(path)
+                                            && path.getFileName()
+                                            .toString()
+                                            .endsWith(".dex"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new UncheckedIOException(e);

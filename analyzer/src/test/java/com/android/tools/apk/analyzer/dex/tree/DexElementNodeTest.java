@@ -25,6 +25,22 @@ import org.junit.jupiter.api.Test;
 
 public class DexElementNodeTest {
 
+    private static class RootNode extends DexElementNode {
+        RootNode(@NonNull String name) {
+            super(name, true);
+        }
+
+        @Override
+        public long getSize() {
+            return 0;
+        }
+
+        @Override
+        public String getNodeTypeShort() {
+            return "R";
+        }
+    }
+
     private static class ConcreteNode extends DexElementNode {
         ConcreteNode(@NonNull String name, boolean allowsChildren) {
             super(name, allowsChildren);
@@ -33,6 +49,11 @@ public class DexElementNodeTest {
         @Override
         public long getSize() {
             return 0;
+        }
+
+        @Override
+        public String getNodeTypeShort() {
+            return "C";
         }
     }
 
@@ -45,17 +66,16 @@ public class DexElementNodeTest {
         public long getSize() {
             return 0;
         }
+
+        @Override
+        public String getNodeTypeShort() {
+            return "A";
+        }
     }
 
     @Test
     public void getChildByTypeTest() throws IOException {
-        DexElementNode node =
-                new DexElementNode("root", true) {
-                    @Override
-                    public long getSize() {
-                        return 0;
-                    }
-                };
+        DexElementNode node = new RootNode("root");
         ConcreteNode childNode = new ConcreteNode("name_1", false);
         ConcreteNode childNode2 = new ConcreteNode("name_2", false);
 
@@ -77,13 +97,7 @@ public class DexElementNodeTest {
 
     @Test
     public void sortTest() throws IOException {
-        DexElementNode node =
-                new DexElementNode("root", true) {
-                    @Override
-                    public long getSize() {
-                        return 0;
-                    }
-                };
+        DexElementNode node = new RootNode("root");
         ConcreteNode childNode = new ConcreteNode("name_2", false);
         ConcreteNode childNode2 = new ConcreteNode("name_1", false);
 

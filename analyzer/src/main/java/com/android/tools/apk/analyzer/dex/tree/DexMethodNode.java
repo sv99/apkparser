@@ -32,6 +32,11 @@ public class DexMethodNode extends DexElementNode {
         super(displayName, false, reference);
     }
 
+    @Override
+    public String getNodeTypeShort() {
+        return "M";
+    }
+
     @Nullable
     @Override
     public MethodReference getReference() {

@@ -80,7 +80,7 @@ public class PackageTreeCreator {
     }
 
     @NonNull
-    private static Map<String, TypeReference> getAllTypeReferencesByClassName(
+    public static Map<String, TypeReference> getAllTypeReferencesByClassName(
             @NonNull DexBackedDexFile dexFile) {
         HashMap<String, TypeReference> typesByName = new HashMap<>();
         for (int i = 0, m = dexFile.getTypeSection().size(); i < m; i++) {
