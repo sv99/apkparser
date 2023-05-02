@@ -70,6 +70,7 @@ public class ApkAnalyzerCli {
     private static final String SUBJECT_MANIFEST = "manifest";
     private static final String SUBJECT_DEX = "dex";
     private static final String SUBJECT_RESOURCES = "resources";
+    private static final String SUBJECT_AAPT = "aapt";
     private static final String ACTION_SUMMARY = "summary";
     private static final String ACTION_RAW_SIZE = "file-size";
     private static final String ACTION_DOWNLOAD_SIZE = "download-size";
@@ -93,6 +94,7 @@ public class ApkAnalyzerCli {
     private static final String ACTION_FEATURES = "features";
     private static final String ACTION_COMPARE = "compare";
     private static final String ACTION_NAMES = "names";
+    private static final String ACTION_VERSION = "version";
 
     private final PrintStream out;
     private final PrintStream err;
@@ -1031,6 +1033,19 @@ public class ApkAnalyzerCli {
                 assert filePathSpec != null;
                 impl.resXml(
                         opts.valueOf(getFileSpec()).toPath(), opts.valueOf(filePathSpec));
+            }
+        },
+        AAPT_VERSION(
+                SUBJECT_AAPT,
+                ACTION_VERSION,
+                "Prints the version of the aapt") {
+            @Override
+            public void execute(
+                    PrintStream out,
+                    PrintStream err,
+                    @NonNull ApkAnalyzerImpl impl,
+                    @NonNull String... args) {
+                impl.aaptVersion();
             }
         },
         ;

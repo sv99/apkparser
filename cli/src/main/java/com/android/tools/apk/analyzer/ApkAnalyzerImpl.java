@@ -600,6 +600,17 @@ public class ApkAnalyzerImpl {
         }
     }
 
+    public void aaptVersion() {
+        try {
+            out.println(aaptInvoker.getPath());
+            for (String s : aaptInvoker.dumpVersion()) {
+                out.println(s);
+            }
+        } catch (ProcessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @NonNull
     private ManifestData getManifestData(@NonNull Archive archive)
             throws IOException, ParserConfigurationException, SAXException {

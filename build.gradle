@@ -17,6 +17,8 @@ buildscript {
             testutils      : "com.android.tools:testutils:27.1.1",
             mockito_core   : 'org.mockito:mockito-core:4.11.0', // last supported Java 8
         ]
+
+        junit_version = "5.9.2"
     }
 }
 
@@ -41,8 +43,6 @@ allprojects {
         mavenCentral()
         google()
     }
-
-    junit_version = "5.9.2"
 
     dependencies {
         implementation(libs.guava)

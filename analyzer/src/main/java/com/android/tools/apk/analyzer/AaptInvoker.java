@@ -48,6 +48,11 @@ public class AaptInvoker {
     }
 
     @NonNull
+    public Path getPath() {
+        return aapt;
+    }
+
+    @NonNull
     private List<String> invokeAaptWithParameters(
             @NonNull File apkFile, @NonNull String resource, @NonNull String... parameters)
             throws ProcessException {
@@ -89,6 +94,11 @@ public class AaptInvoker {
     @NonNull
     public List<String> dumpBadging(@NonNull File apk) throws ProcessException {
         return invokeAaptWithParameters("dump", "badging", apk.toString());
+    }
+
+    @NonNull
+    public List<String> dumpVersion() throws ProcessException {
+        return invokeAaptWithParameters("version");
     }
 
     /**
