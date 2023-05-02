@@ -90,20 +90,7 @@ public class ApkAnalyzerImpl {
 
     public void resPackages(@NonNull Path apk) {
         try (ArchiveContext archiveContext = Archives.open(apk)) {
-            byte[] resContents =
-                    Files.readAllBytes(
-                            archiveContext.getArchive().getContentRoot().resolve("resources.arsc"));
-            BinaryResourceFile binaryRes = new BinaryResourceFile(resContents);
-            List<Chunk> chunks = binaryRes.getChunks();
-            if (chunks.isEmpty()) {
-                throw new IOException("no chunks");
-            }
-
-            if (!(chunks.get(0) instanceof ResourceTableChunk)) {
-                throw new IOException("no res table chunk");
-            }
-
-            ResourceTableChunk resourceTableChunk = (ResourceTableChunk) chunks.get(0);
+            ResourceTableChunk resourceTableChunk = getResourceTableChunk(archiveContext);
             resourceTableChunk
                     .getPackages()
                     .forEach(packageChunk -> out.println(packageChunk.getPackageName()));
@@ -131,35 +118,11 @@ public class ApkAnalyzerImpl {
             @NonNull String config,
             @Nullable String packageName) {
         try (ArchiveContext archiveContext = Archives.open(apk)) {
-            byte[] resContents =
-                    Files.readAllBytes(
-                            archiveContext.getArchive().getContentRoot().resolve("resources.arsc"));
-            BinaryResourceFile binaryRes = new BinaryResourceFile(resContents);
-            List<Chunk> chunks = binaryRes.getChunks();
-            if (chunks.isEmpty()) {
-                throw new IOException("no chunks");
-            }
-
-            if (!(chunks.get(0) instanceof ResourceTableChunk)) {
-                throw new IOException("no res table chunk");
-            }
-
-            ResourceTableChunk resourceTableChunk = (ResourceTableChunk) chunks.get(0);
-            Optional<PackageChunk> packageChunk;
-            if (packageName != null) {
-                packageChunk = Optional.ofNullable(resourceTableChunk.getPackage(packageName));
-            } else {
-                packageChunk = resourceTableChunk.getPackages().stream().findFirst();
-            }
-            if (!packageChunk.isPresent()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Can't find package chunk %s",
-                                packageName == null ? "" : "(" + packageName + ")"));
-            }
-            TypeSpecChunk typeSpecChunk = packageChunk.get().getTypeSpecChunk(type);
+            ResourceTableChunk resourceTableChunk = getResourceTableChunk(archiveContext);
+            PackageChunk packageChunk = getPackageChunk(packageName, resourceTableChunk);
+            TypeSpecChunk typeSpecChunk = packageChunk.getTypeSpecChunk(type);
             List<TypeChunk> typeChunks =
-                    ImmutableList.copyOf(packageChunk.get().getTypeChunks(typeSpecChunk.getId()));
+                    ImmutableList.copyOf(packageChunk.getTypeChunks(typeSpecChunk.getId()));
             for (TypeChunk typeChunk : typeChunks) {
                 if (config.equals(typeChunk.getConfiguration().toString())) {
                     for (TypeChunk.Entry typeEntry : typeChunk.getEntries().values()) {
@@ -182,36 +145,12 @@ public class ApkAnalyzerImpl {
             @NonNull String name,
             @Nullable String packageName) {
         try (ArchiveContext archiveContext = Archives.open(apk)) {
-            byte[] resContents =
-                    Files.readAllBytes(
-                            archiveContext.getArchive().getContentRoot().resolve("resources.arsc"));
-            BinaryResourceFile binaryRes = new BinaryResourceFile(resContents);
-            List<Chunk> chunks = binaryRes.getChunks();
-            if (chunks.isEmpty()) {
-                throw new IOException("no chunks");
-            }
-
-            if (!(chunks.get(0) instanceof ResourceTableChunk)) {
-                throw new IOException("no res table chunk");
-            }
-
-            ResourceTableChunk resourceTableChunk = (ResourceTableChunk) chunks.get(0);
+            ResourceTableChunk resourceTableChunk = getResourceTableChunk(archiveContext);
             StringPoolChunk stringPoolChunk = resourceTableChunk.getStringPool();
-            Optional<PackageChunk> packageChunk;
-            if (packageName != null) {
-                packageChunk = Optional.ofNullable(resourceTableChunk.getPackage(packageName));
-            } else {
-                packageChunk = resourceTableChunk.getPackages().stream().findFirst();
-            }
-            if (!packageChunk.isPresent()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Can't find package chunk %s",
-                                packageName == null ? "" : "(" + packageName + ")"));
-            }
-            TypeSpecChunk typeSpecChunk = packageChunk.get().getTypeSpecChunk(type);
+            PackageChunk packageChunk = getPackageChunk(packageName, resourceTableChunk);
+            TypeSpecChunk typeSpecChunk = packageChunk.getTypeSpecChunk(type);
             List<TypeChunk> typeChunks =
-                    ImmutableList.copyOf(packageChunk.get().getTypeChunks(typeSpecChunk.getId()));
+                    ImmutableList.copyOf(packageChunk.getTypeChunks(typeSpecChunk.getId()));
             for (TypeChunk typeChunk : typeChunks) {
                 if (config.equals(typeChunk.getConfiguration().toString())) {
                     for (TypeChunk.Entry typeEntry : typeChunk.getEntries().values()) {
@@ -250,41 +189,51 @@ public class ApkAnalyzerImpl {
 
     public void resConfigs(@NonNull Path apk, @NonNull String type, @Nullable String packageName) {
         try (ArchiveContext archiveContext = Archives.open(apk)) {
-            byte[] resContents =
-                    Files.readAllBytes(
-                            archiveContext.getArchive().getContentRoot().resolve("resources.arsc"));
-            BinaryResourceFile binaryRes = new BinaryResourceFile(resContents);
-            List<Chunk> chunks = binaryRes.getChunks();
-            if (chunks.isEmpty()) {
-                throw new IOException("no chunks");
-            }
-
-            if (!(chunks.get(0) instanceof ResourceTableChunk)) {
-                throw new IOException("no res table chunk");
-            }
-
-            ResourceTableChunk resourceTableChunk = (ResourceTableChunk) chunks.get(0);
-            Optional<PackageChunk> packageChunk;
-            if (packageName != null) {
-                packageChunk = Optional.ofNullable(resourceTableChunk.getPackage(packageName));
-            } else {
-                packageChunk = resourceTableChunk.getPackages().stream().findFirst();
-            }
-            if (!packageChunk.isPresent()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Can't find package chunk %s",
-                                packageName == null ? "" : "(" + packageName + ")"));
-            }
-            TypeSpecChunk typeSpecChunk = packageChunk.get().getTypeSpecChunk(type);
+            ResourceTableChunk resourceTableChunk = getResourceTableChunk(archiveContext);
+            PackageChunk packageChunk = getPackageChunk(packageName, resourceTableChunk);
+            TypeSpecChunk typeSpecChunk = packageChunk.getTypeSpecChunk(type);
             List<TypeChunk> typeChunks =
-                    ImmutableList.copyOf(packageChunk.get().getTypeChunks(typeSpecChunk.getId()));
+                    ImmutableList.copyOf(packageChunk.getTypeChunks(typeSpecChunk.getId()));
             for (TypeChunk typeChunk : typeChunks) {
                 out.println(typeChunk.getConfiguration().toString());
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static ResourceTableChunk getResourceTableChunk(ArchiveContext archiveContext) throws IOException {
+        byte[] resContents =
+                Files.readAllBytes(
+                        archiveContext.getArchive().getContentRoot().resolve("resources.arsc"));
+        BinaryResourceFile binaryRes = new BinaryResourceFile(resContents);
+        List<Chunk> chunks = binaryRes.getChunks();
+        if (chunks.isEmpty()) {
+            throw new IOException("no chunks");
+        }
+
+        if (!(chunks.get(0) instanceof ResourceTableChunk)) {
+            throw new IOException("no res table chunk");
+        }
+
+        return (ResourceTableChunk) chunks.get(0);
+    }
+
+    @NonNull
+    private static PackageChunk getPackageChunk(@Nullable String packageName, ResourceTableChunk resourceTableChunk) {
+        Optional<PackageChunk> packageChunk;
+        if (packageName != null) {
+            packageChunk = Optional.ofNullable(resourceTableChunk.getPackage(packageName));
+        } else {
+            packageChunk = resourceTableChunk.getPackages().stream().findFirst();
+        }
+        if (!packageChunk.isPresent()) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Can't find package chunk %s",
+                            packageName == null ? "" : "(" + packageName + ")"));
+        }
+        return packageChunk.get();
     }
 
     public void dexCode(
