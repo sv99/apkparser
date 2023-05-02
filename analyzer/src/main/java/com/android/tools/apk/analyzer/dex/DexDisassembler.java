@@ -29,11 +29,14 @@ import com.android.tools.smali.baksmali.Adaptors.ClassDefinition;
 import com.android.tools.smali.baksmali.Adaptors.MethodDefinition;
 import com.android.tools.smali.baksmali.BaksmaliOptions;
 import com.android.tools.smali.baksmali.formatter.BaksmaliWriter;
+import com.android.tools.smali.dexlib2.Opcode;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
+import com.android.tools.smali.dexlib2.formatter.DexFormatter;
 import com.android.tools.smali.dexlib2.iface.ClassDef;
 import com.android.tools.smali.dexlib2.iface.DexFile;
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.MethodImplementation;
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
 import com.android.tools.smali.dexlib2.rewriter.DexRewriter;
@@ -42,7 +45,6 @@ import com.android.tools.smali.dexlib2.rewriter.Rewriter;
 import com.android.tools.smali.dexlib2.rewriter.RewriterModule;
 import com.android.tools.smali.dexlib2.rewriter.Rewriters;
 import com.android.tools.smali.dexlib2.rewriter.TypeRewriter;
-import com.android.tools.smali.dexlib2.util.ReferenceUtil;
 
 public class DexDisassembler {
     @NonNull private final DexFile dexFile;
@@ -64,7 +66,7 @@ public class DexDisassembler {
 
         Optional<? extends Method> method =
                 StreamSupport.stream(classDef.get().getMethods().spliterator(), false)
-                        .filter(m -> methodDescriptor.equals(ReferenceUtil.getMethodDescriptor(m)))
+                        .filter(m -> methodDescriptor.equals(DexFormatter.INSTANCE.getMethodDescriptor(m)))
                         .findFirst();
 
         if (!method.isPresent()) {
@@ -78,8 +80,8 @@ public class DexDisassembler {
     @NonNull
     public String disassembleMethod(@NonNull String fqcn, @NonNull MethodReference methodRef)
             throws IOException {
-        fqcn = PackageTreeCreator.decodeClassName(SigUtils.typeToSignature(fqcn), proguardMap);
-        Optional<? extends ClassDef> classDef = getClassDef(fqcn);
+        String jvmFqcn = PackageTreeCreator.decodeClassName(SigUtils.typeToSignature(fqcn), proguardMap);
+        Optional<? extends ClassDef> classDef = getClassDef(jvmFqcn);
         if (!classDef.isPresent()) {
             throw new IllegalStateException("Unable to locate class definition for " + fqcn);
         }
@@ -99,6 +101,39 @@ public class DexDisassembler {
         }
 
         return getMethodDexCode(classDef.get(), method.get());
+    }
+
+    public String getMethodBody(@NonNull String fqcn, @NonNull String methodDescriptor)
+            throws IOException {
+        String jvmFqcn = PackageTreeCreator.decodeClassName(SigUtils.typeToSignature(fqcn), proguardMap);
+        Optional<? extends ClassDef> classDef = getClassDef(jvmFqcn);
+        if (!classDef.isPresent()) {
+            throw new IllegalStateException("Unable to locate class definition for " + fqcn);
+        }
+
+        Optional<? extends Method> method =
+                StreamSupport.stream(classDef.get().getMethods().spliterator(), false)
+                        .filter(m -> methodDescriptor.equals(DexFormatter.INSTANCE.getMethodDescriptor(m)))
+                        .findFirst();
+
+        if (!method.isPresent()) {
+            throw new IllegalStateException(
+                    "Unable to locate method definition in class for method " + methodDescriptor);
+        }
+
+        MethodImplementation impl = method.get().getImplementation();
+        if (impl == null) {
+            throw new IllegalStateException(
+                    "The method don't have implementation " + methodDescriptor);
+        }
+        StringWriter writer = new StringWriter(1024);
+        writer.write(methodDescriptor);
+        writer.write("\n");
+        writer.write(String.format("\t.registers %s\n", impl.getRegisterCount()));
+        for (Instruction ins: impl.getInstructions()) {
+            writer.write(String.format("%s: %s\n", ins.getOpcode().toString(), ins.getCodeUnits()));
+        }
+        return writer.toString();
     }
 
     @NonNull

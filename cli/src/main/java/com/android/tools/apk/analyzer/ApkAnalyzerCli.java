@@ -86,6 +86,7 @@ public class ApkAnalyzerCli {
     private static final String ACTION_REFERENCES = "references";
     private static final String ACTION_PACKAGES = "packages";
     private static final String ACTION_CODE = "code";
+    private static final String ACTION_CODE_BODY = "code-body";
     private static final String ACTION_XML = "xml";
     private static final String ACTION_CONFIGS = "configs";
     private static final String ACTION_VALUE = "value";
@@ -750,6 +751,105 @@ public class ApkAnalyzerCli {
                         opts.has(pgMappingSpec) ? opts.valueOf(pgMappingSpec).toPath() : null);
             }
         },
+        DEX_CODE_BODY(
+                SUBJECT_DEX,
+                ACTION_CODE_BODY,
+                "Prints the body opcodes of the method") {
+            public ArgumentAcceptingOptionSpec<File> pgMappingSpec;
+            public ArgumentAcceptingOptionSpec<File> pgFolderSpec;
+            public ArgumentAcceptingOptionSpec<String> classSpec;
+            public ArgumentAcceptingOptionSpec<String> methodSpec;
+            @Nullable public OptionParser parser;
+
+            @NonNull
+            @Override
+            public OptionParser getParser() {
+                if (parser == null) {
+                    parser = super.getParser();
+                    classSpec =
+                            parser.acceptsAll(Arrays.asList("c", FLAG_CLASS), "Fully qualified class name to decompile.")
+                                    .withRequiredArg()
+                                    .ofType(String.class)
+                                    .required();
+                    methodSpec =
+                            parser.acceptsAll(
+                                            Arrays.asList("m", FLAG_METHOD),
+                                            "Method to decompile. Format: name(params)returnType, e.g. someMethod(Ljava/lang/String;I)V")
+                                    .withRequiredArg()
+                                    .ofType(String.class)
+                                    .required();
+                    pgFolderSpec =
+                            parser.accepts(
+                                            FLAG_PROGUARD_FOLDER,
+                                            "The Proguard output folder to search for mappings.")
+                                    .withRequiredArg()
+                                    .ofType(File.class);
+                    pgMappingSpec =
+                            parser.accepts(FLAG_PROGUARD_MAPPINGS, "The Proguard mappings file.")
+                                    .withRequiredArg()
+                                    .ofType(File.class);
+                }
+                return parser;
+            }
+
+            @Override
+            public void execute(
+                    PrintStream out,
+                    PrintStream err,
+                    @NonNull ApkAnalyzerImpl impl,
+                    @NonNull String... args) {
+                OptionParser parser = getParser();
+                OptionSet opts = parseOrPrintHelp(parser, err, args);
+                impl.dexCodeBody(
+                        opts.valueOf(getFileSpec()).toPath(),
+                        opts.valueOf(classSpec),
+                        opts.valueOf(methodSpec),
+                        opts.has(pgFolderSpec) ? opts.valueOf(pgFolderSpec).toPath() : null,
+                        opts.has(pgMappingSpec) ? opts.valueOf(pgMappingSpec).toPath() : null);
+            }
+        },
+        DEX_COMPARE(
+                SUBJECT_DEX,
+                ACTION_COMPARE,
+                "Compare dex files.\n") {
+
+            public ArgumentAcceptingOptionSpec<String> filesSpec;
+            @Nullable OptionParser parser;
+
+            @NonNull
+            @Override
+            public OptionParser getParser() {
+                if (parser == null) {
+                    parser = super.getParser();
+                    filesSpec =
+                            parser.acceptsAll(
+                                            Arrays.asList("f", FLAG_FILES),
+                                            "Dex file names to compare. Default: all dex files.")
+                                    .withRequiredArg()
+                                    .ofType(String.class);
+                }
+                return parser;
+            }
+
+            @Override
+            public void execute(
+                    PrintStream out,
+                    PrintStream err,
+                    @NonNull ApkAnalyzerImpl impl,
+                    @NonNull String... args) {
+                OptionParser parser = getParser();
+                OptionSet opts = parseOrPrintHelp(parser, err, args);
+                List<File> files = opts.valuesOf(getFileSpec());
+                if (files.size() < 2) {
+                    throw new RuntimeException(
+                            "This method requires two APK paths - old_apk new_apk");
+                }
+                impl.dexCompare(
+                        files.get(0).toPath(),
+                        files.get(1).toPath(),
+                        opts.valuesOf(filesSpec));
+            }
+        },
         RESOURCES_PACKAGES(
                 SUBJECT_RESOURCES,
                 ACTION_PACKAGES,
@@ -802,48 +902,6 @@ public class ApkAnalyzerCli {
                         opts.valueOf(getFileSpec()).toPath(),
                         opts.valueOf(typeSpec),
                         opts.valueOf(packageSpec));
-            }
-        },
-        DEX_COMPARE(
-                SUBJECT_DEX,
-                ACTION_COMPARE,
-                "Compare dex files.\n") {
-
-            public ArgumentAcceptingOptionSpec<String> filesSpec;
-            @Nullable OptionParser parser;
-
-            @NonNull
-            @Override
-            public OptionParser getParser() {
-                if (parser == null) {
-                    parser = super.getParser();
-                    filesSpec =
-                            parser.acceptsAll(
-                                            Arrays.asList("f", FLAG_FILES),
-                                            "Dex file names to compare. Default: all dex files.")
-                                    .withRequiredArg()
-                                    .ofType(String.class);
-                }
-                return parser;
-            }
-
-            @Override
-            public void execute(
-                    PrintStream out,
-                    PrintStream err,
-                    @NonNull ApkAnalyzerImpl impl,
-                    @NonNull String... args) {
-                OptionParser parser = getParser();
-                OptionSet opts = parseOrPrintHelp(parser, err, args);
-                List<File> files = opts.valuesOf(getFileSpec());
-                if (files.size() < 2) {
-                    throw new RuntimeException(
-                            "This method requires two APK paths - old_apk new_apk");
-                }
-                impl.dexCompare(
-                        files.get(0).toPath(),
-                        files.get(1).toPath(),
-                        opts.valuesOf(filesSpec));
             }
         },
         RESOURCES_VALUE(SUBJECT_RESOURCES, ACTION_VALUE, "Prints the given resource's value") {

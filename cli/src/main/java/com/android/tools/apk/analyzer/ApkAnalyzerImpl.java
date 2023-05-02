@@ -30,8 +30,7 @@ import com.android.tools.apk.analyzer.arsc.StringPoolChunk;
 import com.android.tools.apk.analyzer.arsc.TypeChunk;
 import com.android.tools.apk.analyzer.arsc.TypeSpecChunk;
 import com.android.tools.apk.analyzer.dex.*;
-import com.android.tools.apk.analyzer.dex.diff.DexDiffEntry;
-import com.android.tools.apk.analyzer.dex.diff.DexDiffParser;
+import com.android.tools.apk.analyzer.dex.DexDiffParser;
 import com.android.tools.apk.analyzer.dex.tree.DexClassNode;
 import com.android.tools.apk.analyzer.dex.tree.DexElementNode;
 import com.android.tools.apk.analyzer.dex.tree.DexFieldNode;
@@ -40,13 +39,10 @@ import com.android.tools.apk.analyzer.dex.tree.DexPackageNode;
 import com.android.tools.apk.analyzer.internal.ApkDiffEntry;
 import com.android.tools.apk.analyzer.internal.ApkDiffParser;
 import com.android.tools.apk.analyzer.internal.ApkFileByFileDiffParser;
-import com.android.tools.apk.analyzer.internal.ProguardMappingFiles;
 import com.android.tools.apk.analyzer.internal.SigUtils;
 import com.android.tools.proguard.ProguardMap;
 import com.android.tools.proguard.ProguardSeedsMap;
-import com.android.tools.proguard.ProguardUsagesMap;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
@@ -55,14 +51,11 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -301,7 +294,7 @@ public class ApkAnalyzerImpl {
             @Nullable Path proguardFolderPath,
             @Nullable Path proguardMapFilePath) {
         ProguardMappings proguardMappings =
-                getProguardMappings(proguardFolderPath, proguardMapFilePath, null, null);
+                new ProguardMappings(proguardFolderPath, proguardMapFilePath, null, null);
 
         try (ArchiveContext archiveContext = Archives.open(apk)) {
             Collection<Path> dexPaths =
@@ -350,6 +343,47 @@ public class ApkAnalyzerImpl {
         }
     }
 
+    public void dexCodeBody(
+            @NonNull Path apk,
+            @NonNull String fqcn,
+            @NonNull String method,
+            @Nullable Path proguardFolderPath,
+            @Nullable Path proguardMapFilePath) {
+        ProguardMappings proguardMappings =
+                new ProguardMappings(proguardFolderPath, proguardMapFilePath, null, null);
+
+        try (ArchiveContext archiveContext = Archives.open(apk)) {
+            Collection<Path> dexPaths =
+                    getDexFilesFrom(archiveContext.getArchive().getContentRoot());
+
+            boolean dexFound = false;
+            for (Path dexPath : dexPaths) {
+                DexDisassembler disassembler =
+                        new DexDisassembler(DexFiles.getDexFile(dexPath), proguardMappings.map);
+                try {
+                    String originalFqcn =
+                            PackageTreeCreator.decodeClassName(
+                                    SigUtils.typeToSignature(fqcn), proguardMappings.map);
+                    out.println(
+                            disassembler.getMethodBody(
+                                    fqcn,
+                                    SigUtils.typeToSignature(originalFqcn) + "->" + method));
+                    dexFound = true;
+                } catch (IllegalStateException e) {
+                    //this dex file doesn't contain the given method.
+                    //continue searching
+                }
+            }
+            if (!dexFound) {
+                throw new IllegalArgumentException(
+                        String.format(
+                                "The given class (%s) or method (%s) not found", fqcn, method));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public void dexPackages(
             @NonNull Path apk,
             @Nullable Path proguardFolderPath,
@@ -360,7 +394,7 @@ public class ApkAnalyzerImpl {
             boolean showRemoved,
             @Nullable List<String> dexFilePaths) {
         ProguardMappings proguardMappings =
-                getProguardMappings(
+                new ProguardMappings(
                         proguardFolderPath,
                         proguardMapFilePath,
                         proguardSeedsFilePath,
@@ -412,7 +446,7 @@ public class ApkAnalyzerImpl {
         try (ArchiveContext archiveContext1 = Archives.open(oldApkFile);
              ArchiveContext archiveContext2 = Archives.open(newApkFile)) {
             ProguardMappings proguardMappings =
-                    getProguardMappings(null, null, null, null);
+                    new ProguardMappings(null, null, null, null);
             // prepare dex files
             Collection<Path> dexPaths1;
             if (dexFilePaths == null || dexFilePaths.isEmpty()) {
@@ -463,103 +497,11 @@ public class ApkAnalyzerImpl {
                 DexBackedDexFile oldDex = dexFiles1.get(path);
 
                 DexDiffParser parser = new DexDiffParser(oldDex, newDex);
-                ArrayList<DexDiffEntry> diffs = parser.parse();
-                dumpDexCompare(diffs);
+                parser.parse(out);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private void dumpDexCompare(ArrayList<DexDiffEntry> diffs) {
-        int i = 0;
-        for (DexDiffEntry diff: diffs) {
-            out.printf(
-                            "%s\t%s\t%s",
-                            getSize(diff.getOldSize()),
-                            getSize(diff.getNewSize()),
-                            diff.getName())
-                    .println();
-        }
-    }
-
-    @NonNull
-    private static ProguardMappings getProguardMappings(
-            @Nullable Path proguardFolderPath,
-            @Nullable Path proguardMapFilePath,
-            @Nullable Path proguardSeedsFilePath,
-            @Nullable Path proguardUsagesFilePath) {
-        ProguardMappingFiles pfm;
-        if (proguardFolderPath != null) {
-            try {
-                pfm = ProguardMappingFiles.from(new Path[]{proguardFolderPath});
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        } else {
-            pfm =
-                    new ProguardMappingFiles(
-                            proguardMapFilePath, proguardSeedsFilePath, proguardUsagesFilePath);
-        }
-
-        List<String> loaded = new ArrayList<>(3);
-        List<String> errors = new ArrayList<>(3);
-
-        ProguardMap proguardMap = null;
-        if (pfm.mappingFile != null) {
-            proguardMap = new ProguardMap();
-            try {
-                proguardMap.readFromReader(
-                        new InputStreamReader(
-                                Files.newInputStream(pfm.mappingFile), Charsets.UTF_8));
-                loaded.add(pfm.mappingFile.getFileName().toString());
-            } catch (IOException | ParseException e) {
-                errors.add(pfm.mappingFile.getFileName().toString());
-                proguardMap = null;
-            }
-        }
-        ProguardSeedsMap seeds = null;
-        if (pfm.seedsFile != null) {
-            try {
-                seeds =
-                        ProguardSeedsMap.parse(
-                                new InputStreamReader(
-                                        Files.newInputStream(pfm.seedsFile), Charsets.UTF_8));
-                loaded.add(pfm.seedsFile.getFileName().toString());
-            } catch (IOException e) {
-                errors.add(pfm.seedsFile.getFileName().toString());
-            }
-        }
-        ProguardUsagesMap usage = null;
-        if (pfm.usageFile != null) {
-            try {
-                usage =
-                        ProguardUsagesMap.parse(
-                                new InputStreamReader(
-                                        Files.newInputStream(pfm.usageFile), Charsets.UTF_8));
-                loaded.add(pfm.usageFile.getFileName().toString());
-            } catch (IOException e) {
-                errors.add(pfm.usageFile.getFileName().toString());
-            }
-        }
-
-        if (!errors.isEmpty() && loaded.isEmpty()) {
-            System.err.println(
-                    "No Proguard mapping files found. The filenames must match one of: mapping.txt, seeds.txt, usage.txt");
-        } else if (errors.isEmpty() && !loaded.isEmpty()) {
-            System.err.println(
-                    "Successfully loaded maps from: "
-                            + String.join(", ", loaded));
-        } else if (!errors.isEmpty() && !loaded.isEmpty()) {
-            System.err.println(
-                    "Successfully loaded maps from: "
-                            + String.join(", ", loaded)
-                            + "\n"
-                            + "There were problems loading: "
-                            + String.join(", ", errors));
-        }
-
-        return new ProguardMappings(proguardMap, seeds, usage);
     }
 
     private void dumpTree(

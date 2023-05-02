@@ -22,12 +22,9 @@ import com.android.tools.apk.analyzer.ArchiveEntry;
 import com.android.tools.apk.analyzer.ArchiveNode;
 import com.google.common.collect.ImmutableList;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
 import one.util.streamex.StreamEx;
 
 public class ArchiveTreeNode extends DefaultMutableTreeNode implements ArchiveNode {
@@ -40,8 +37,7 @@ public class ArchiveTreeNode extends DefaultMutableTreeNode implements ArchiveNo
     public List<ArchiveNode> getChildren() {
         // Java 8 children has type Vector, never version has type Vector<DefaultMutableTreeNode>
         //noinspection unchecked
-        Vector<DefaultMutableTreeNode> gen_children = children;
-        return children == null ? ImmutableList.of() : StreamEx.of(gen_children)
+        return children == null ? ImmutableList.of() : StreamEx.of(children)
                 .select(ArchiveNode.class)
                 .toImmutableList();
     }
